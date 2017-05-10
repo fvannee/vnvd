@@ -1,3 +1,8 @@
+This repository contains the source code for the compiler for the VNVD programming language. Stas Verberkt and Floris van Nee developed this fully object-oriented language for the course Compiler Construction. The reader is encouraged to take a look at the examples directory to see the power of our language in practice, or to look at the Vnvd directory for the compiler source code.
+The source code is archived here to serve as a reminder for all the hard work that was put into this project.
+
+--------------------------------------------------------------------------------------
+
 Goedendag lezer,
 
 Welkom op de Vertalerbouw CD-ROM van Floris van Nee en Stas Verberkt.

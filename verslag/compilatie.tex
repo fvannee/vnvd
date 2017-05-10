@@ -1,0 +1,18 @@
+\section{Compilatie van de VNVD compiler}
+Om de VNVD compiler zelf te compileren zijn er allereerst een aantal vereisten. Deze moeten zich op het systeem bevinden om de compilatie uit te kunnen voeren. Net zoals het nodig is om het \textit{.NET Framework} te hebben om de compiler zelf te draaien en de programma's die deze produceert te executeren heb je dit framework ook nodig om de compiler te bouwen.
+
+Het is overigens ook mogelijk om te werken met een open source variant van dit framework. In dat geval valt het aan te raden voor \textit{Mono} te kiezen.
+
+Daarnaast zijn natuurlijk de broncode zelf en de C\# libraries van ANTLR vereist. Deze bevinden zich gelukkig allemaal in het meegeleverde pakket. De compilatie kan gedraaid worden vanuit de map \textit{bin} die zich in de broncode map \textit{Vnvd} bevindt. Het commando om te compileren is, in het geval men het \textit{.NET Framework} gebruikt:
+
+\begin{lstlisting}
+csc /out:Vnvd.exe /target:exe ..\AbstractHelper.cs ..\CheckerHelper.cs ..\CheckerManual.cs ..\EntryType.cs ..\GeneratorHelper.cs ..\GeneratorManual.cs ..\IdEntry.cs ..\ISymTab.cs ..\LibraryChecker.cs ..\Pair.cs ..\Parameter.cs ..\Qualifier.cs ..\StringHelper.cs ..\SymbolTable.cs ..\TreeNodeAdapter.cs ..\TreeNode.cs ..\Vnvd.cs ..\Antlr\VnvdChecker.cs ..\Antlr\VnvdGenerator.cs ..\Antlr\VnvdLexer.cs ..\Antlr\VnvdParser.cs ..\UserDefined\CustomBinder.cs ..\UserDefined\ErrorType.cs ..\UserDefined\IMethodOrConstructor.cs ..\UserDefined\MethodType.cs ..\UserDefined\NullType.cs ..\UserDefined\UserConstructor.cs ..\UserDefined\UserEnum.cs ..\UserDefined\UserField.cs ..\UserDefined\UserLocal.cs ..\UserDefined\UserMethod.cs ..\UserDefined\UserParameter.cs ..\UserDefined\UserType.cs ..\Properties\AssemblyInfo.cs /r:System.dll /r:System.Data.dll /r:System.Xml.dll /r:Antlr3.Runtime.dll /r:Antlr3.Utility.dll /r:antlr.runtime.dll /r:StringTemplate.dll
+\end{lstlisting}
+
+In het geval dat er met \textit{Mono} gewerkt wordt is het commando:
+
+\begin{lstlisting}
+gmcs2 ../AbstractHelper.cs ../CheckerHelper.cs ../CheckerManual.cs ../EntryType.cs ../GeneratorHelper.cs ../GeneratorManual.cs ../IdEntry.cs ../ISymTab.cs ../LibraryChecker.cs ../Pair.cs ../Parameter.cs ../Qualifier.cs ../StringHelper.cs ../SymbolTable.cs ../TreeNodeAdapter.cs ../TreeNode.cs ../Vnvd.cs ../Antlr/VnvdChecker.cs ../Antlr/VnvdGenerator.cs ../Antlr/VnvdLexer.cs ../Antlr/VnvdParser.cs ../UserDefined/CustomBinder.cs ../UserDefined/ErrorType.cs ../UserDefined/IMethodOrConstructor.cs ../UserDefined/MethodType.cs ../UserDefined/NullType.cs ../UserDefined/UserConstructor.cs ../UserDefined/UserEnum.cs ../UserDefined/UserField.cs ../UserDefined/UserLocal.cs ../UserDefined/UserMethod.cs ../UserDefined/UserParameter.cs ../UserDefined/UserType.cs ../Properties/AssemblyInfo.cs -r:System -r:System.Data -r:System.Xml -r:Antlr3.Runtime.dll -r:Antlr3.Utility.dll -r:antlr.runtime.dll -r:StringTemplate.dll -out:Vnvd.exe
+\end{lstlisting}
+
+Nadat de compilatie is uitgevoerd is er een bestand \textit{Vnvd.exe} aangemaakt in de huidige map. Deze executable is de VNVD compiler.

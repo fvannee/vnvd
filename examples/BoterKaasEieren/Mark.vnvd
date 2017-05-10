@@ -1,0 +1,33 @@
+import System;
+
+namespace BoterKaasEieren
+{
+   class public Mark
+   {
+      public static initonly Mark XX, OO, EMPTY;
+
+      private String sign;
+      
+      private Mark(String sign)
+      {
+         this::sign = sign;
+      }
+      
+      public Mark Other()
+      {
+         if (this == Mark::XX;) then Mark::OO else Mark::XX ;
+      }
+      
+      public override String ToString()
+      {
+         this::sign;
+      }
+      
+      static
+      {
+         Mark::XX = new Mark("X");
+         Mark::OO = new Mark("O");
+         Mark::EMPTY = new Mark(" ");
+      }
+   }
+}

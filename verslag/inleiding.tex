@@ -1,0 +1,14 @@
+\section{Inleiding}
+Voor de eindopdracht van vertalerbouw was het de bedoeling om zelf een compiler voor een programmeertaal te ontwikkelen. De syntax van de programmeertaal mocht zelf worden gedefinieerd, maar de taal moest wel aan een aantal eisen voldoen. Het belangrijkste was, dat de taal een \emph{expression language} moest zijn. Dit houdt in dat alles een expressie is, en dus alles een waarde op de stack achterlaat.
+
+Voor het ontwikkelen van de compiler wordt gebruik gemaakt van ANTLR. ANTLR is een tool voor compiler ontwikkelaars die veel werk uit handen van de ontwikkelaar kan nemen. De compiler bestaat uit zes fases:
+\begin {enumerate}
+	\item lexer; zet het input bestand om in een token stream (met ANTLR),
+	\item parser; analyseert de token stream en maakt er een Abstract Syntax Tree van (met ANTLR),
+	\item pre-checker; loopt over de namespaces en klassen in de AST heen om tijdens het checken klassen en members te kunnen resolven (handmatige tree walker die slechts over een klein deel loopt).
+	\item checker; loopt over de AST heen en bekijkt de context beperkingen, zoals type checking (ANTLR tree walker).
+	\item pre-code generator; loopt over de namespaces en klassen in de AST heen om de assembly headers, waarin klassen en members gedefinieerd worden, te defini\"eren (handmatige tree walker die slechts over een klein deel loopt).
+	\item code generator; loopt nogmaals over de AST heen en schrijft bytecode weg. Er is door ons gekozen om CIL code te genereren. Er worden dus .NET assemblies gegenereerd die kunnen draaien op de CLR of Mono (ANTLR tree walker).
+\end {enumerate}
+
+De compiler zelf is geschreven in C\#. ANTLR genereert C\# code, en de extra programmatuur, zoals een symbol table en uitgebreide AST nodes is ook ontwikkeld in C\#.

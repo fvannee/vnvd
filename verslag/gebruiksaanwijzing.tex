@@ -1,0 +1,32 @@
+\section{Gebruiksaanwijzing van de VNVD compiler}
+De VNVD compiler kan aangeroepen worden met een aantal bestanden (met een bestandsnaam eindigend op \textit{.vnvd}) kan worden meegegeven. Deze komen met volledige naam achter de aanroep naar de compiler op de commando regel.
+
+Met de VNVD compiler kunnen zowel executables als libraries gecompileerd worden. Voor het compileren van executables dient de bestandsnaam van de te genereren assembly te eindigen op \textit{.exe}. Daarnaast dient deze \'e\'en statische \textit{Main()} of \textit{Main(String[] args)} te kennen die \textit{void} retouneert. Voor een library dient de bestandsnaam te eindigen op \textit{.dll}.
+
+De VNVD compiler kent een aantal compiler switches die nodig zijn voor het juist functioneren van de compiler. Deze kunnen voor de bestandsnamen worden toegevoegd aan de commando regel. Deze switches vallen te verdelen in de switches voor normaal gebruik en de switches die vanwege didactische redenen zijn toegevoegd. De normale switches zijn als volgt:
+
+\begin{description}
+	\item[\textminus\textminus{}out:\textless{}executable\_naam\textgreater{}] Hiermee kan men specificeren hoe de gecompileerde executable moet gaan heten.
+	\item[\textminus\textminus{}ref:\textless{}assembly\_naam\textgreater{}] Hiermee kan men een assembly ter referentie toevoegen. De klassen en methoden in deze assembly kunnen dan gebruikt worden door de linker. VNVD houdt hierbij rekening met systeem paden, zodat assemblies uit het .NET framework makkelijk kunnen worden toegevoegd.
+\end{description}
+
+De switches ge\"implementeerd voor de ontwikkeling van de compiler en leerdoeleinden zijn als volgt:
+
+\begin{description}
+	\item[\textminus\textminus{}ast] De compiler zal een bestand ast.txt aanmaken, met daarin een tekstuele representatie van de \textit{abstract syntax tree}.
+	\item[\textminus\textminus{}dot] De compiler zal een bestand ast.dot aanmaken, met daarin een grafische representatie van de \textit{abstract syntax tree}.
+	\item[\textminus\textminus{}nochecker] Hiermee kan de checker fase tijdelijk uit worden gezet.
+	\item[\textminus\textminus{}nogenerator] Hiermee kan de code generator fase tijdelijk uit worden gezet.
+\end{description}
+
+Tot slot kent de compiler nog een switch die geen enkel doel dient, namelijk:
+
+\begin{description}
+	\item[\textminus\textminus{}van] De compiler zal "Nee" naar de standard output schrijven en afsluiten.
+\end{description}
+
+Een voorbeeld aanroep naar VNVD ziet er als volgt uit:
+
+\begin{lstlisting}
+Vnvd.exe --ref:System --ref:System.Windows.Forms --ref:System.Drawing --out:BKE.exe Bord.vnvd Mark.vnvd MensSpeler.vnvd Spel.vnvd ComputerSpeler.vnvd IStrategie.vnvd Speler.vnvd BkeGui.vnvd IMessageListener.vnvd BesteStrategie.vnvd DommeStrategie.vnvd
+\end{lstlisting}

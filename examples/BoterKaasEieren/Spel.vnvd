@@ -1,0 +1,93 @@
+import System;
+import System.Collections;
+import System.Threading;
+
+namespace BoterKaasEieren
+{
+   class public Spel
+   {
+      public static initonly Int32 AANTAL_SPELERS;
+      
+      private Speler[] spelers;
+      private Int32 huidig;
+      private Bord bord;
+      private ArrayList listeners;
+      
+      public Spel(Speler s1, Speler s2)
+      {
+         this::spelers = new Speler[] { s1, s2 };
+         this::listeners = new ArrayList();
+         this::bord = new Bord();
+      }
+      
+      public Bord GetBord()
+      {
+         this::bord;
+      }
+      
+      public Int32 GetHuidig()
+      {
+         this::huidig;
+      }
+      
+      public Speler GetHuidigeSpeler()
+      {
+         this::spelers[this::huidig];
+      }
+      
+      public Speler[] GetSpelers()
+      {
+         this::spelers;
+      }
+      
+      public void Reset()
+      {
+         this::bord::Reset();
+         this::huidig = 0;
+      }
+      
+      public void Play()
+      {
+         this::Update(null);
+         while (!this::bord::GameOver();)
+         {
+            this::spelers[this::huidig]::DoeZet(this::bord);
+            this::huidig = (this::huidig + 1) % Spel::AANTAL_SPELERS;
+            
+            this::Update(this::bord);
+         };
+         this::Update(if (this::bord::HeeftWinnaar();) then (Object)((this::huidig + 1) % Spel::AANTAL_SPELERS) else (Object)-1 );
+      }
+      
+      public void AddObserver(IMessageListener l)
+      {
+         this::listeners::Add(l);
+      }
+      
+      public void RemoveObserver(IMessageListener l)
+      {
+         this::listeners::Remove(l);
+      }
+      
+      public void Update(Object msg)
+      {
+         for (IMessageListener l in this::listeners)
+         {
+            if (l::get_InvokeRequired();) then
+            {
+   	         l::Invoke(new ParameterizedThreadStart(l::MessageReceived), new Object[] { msg });
+   	      }
+   	      else
+   	      {
+               l::MessageReceived(msg);
+            }
+            ;
+         };
+      }
+      
+      static
+      {
+         Spel::AANTAL_SPELERS = 2;
+      }
+   }
+}

@@ -1,0 +1,19 @@
+import System;
+
+namespace Tests
+{
+	class public Constants
+	{
+		public static void Main(String[] argv)
+		{
+			Int32[] array = new Int32[] {0, 1, 2, 3, 4};
+			Int32[] test = new Int32[2];
+			
+			test[0] = test[1] = 5;
+			
+			Console::WriteLine(test::get_Length());
+			Console::WriteLine(test[0] + test[1]);
+			Console::WriteLine(array[0] + array[1] + array[2] + array[3] + array[4]);
+		}
+	}
+}

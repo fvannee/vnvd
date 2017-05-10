@@ -1,0 +1,45 @@
+import System;
+
+namespace Tests
+{
+   class public CorrectTest
+   {
+      public static void Main(String[] argv)
+      {
+         Int32 ivar;
+         ivar = 
+            {
+               Int32 ivar1, ivar2;
+               read(ivar1, ivar2);
+               write(ivar1, ivar2);
+               const Int32 iconst1 = 1;
+               const Int32 iconst2 = 2;
+               ivar2 = ivar1 = +16 + 2 * -8;
+               write(ivar1 < ivar2 && iconst1 <= iconst2, iconst1 * iconst2 > ivar2 - ivar1);
+               ivar1 < read(ivar2) && iconst1 <= iconst2;
+               ivar2 = write(ivar2) + 1;
+            } + 1;
+         Boolean bvar;
+         bvar =
+            {
+               Boolean bvar;
+               read(bvar);
+               write(bvar);
+               bvar = 12 / 5 * 5 + 12 % 5 == 12 && 6 >= 6;
+               const Boolean bconst = true;
+               write(!false && bvar == bconst || true != false);
+            } && true;
+         Char cvar;
+         cvar =
+            {
+               Char cvar1, cvar2;
+               read(cvar1);
+               const Char cconst = 'c';
+               cvar2 = 'z';
+               write('a', cvar1 == cconst && (cvar2 != 'b' || !true));
+               'b';
+            };
+         write(ivar, bvar, cvar);
+      }
+   }
+}

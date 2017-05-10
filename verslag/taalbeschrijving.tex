@@ -1,0 +1,630 @@
+\section{Taalbeschrijving}
+Deze sectie bevat de volledige beschrijving van VNVD. Deze beschrijving bestaat uit de syntax, de context beperkingen en de semantische regels.
+
+\subsection{Programmastructuur}
+Onde programmastructuur valle alle regels die de basis structuur van een programma defini\"eren. Dit zijn de regels voor namespaces en import statements. Alle leden van de namespaces vallen onder de klassenstructuur.
+
+\subsubsection{Syntax}
+Hieronder volgt de syntax beschrijving in \textit{Extended Bachus Naur Form} van alle programmastructuur gerelateerde regels.
+
+\begin{lstlisting}
+program
+	::=	import_stat* namespace_decl*
+
+import_stat
+	::=	USING qualifier SEMICOLON
+
+namespace_decl
+	::=	NAMESPACE qualifier LCURLYBRACE namespace_body RCURLYBRACE
+
+namespace_body
+	::=	(class_decl | interface_decl | enum_decl)*
+\end{lstlisting}
+
+\subsubsection{Context-beperkingen}
+De programmastructuur kent geen context-beperkingen.
+
+\subsubsection{Semantiek}
+Dit zijn de semantische regels voor de programmastructuur.
+
+\begin{itemize}
+	\item Een programma 'P' wordt gedraaid door de Main methode, gedefinieerd in \'e\'en van zijn klassen uit te voeren. Wanneer er geen Main methode is, is het programma een library.
+\end{itemize}
+
+\subsection{Klassenstructuur}
+Dit zijn de regels met betrekking tot de klassen, interfaces en enumeraties.
+
+\subsubsection{Syntax}
+Hieronder volgt de syntax beschrijving in \textit{Extended Bachus Naur Form} van alle klassenstructuur gerelateerde regels.
+
+\begin{lstlisting}
+class_mod_list
+	::=	access_modifier (ABSTRACT)?
+
+class_decl
+	::=	CLASS class_mod_list qualifier (EXTENDS qualifier)? (IMPLEMENTS type_list)? class_body
+
+class_body
+	::=	LCURLYBRACE class_element* RCURLYBRACE
+
+enum_decl
+	::=	ENUM access_modifier qualifier enum_body
+
+interface_decl
+	::=	INTERFACE class_mod_list qualifier (EXTENDS qualifier)? interface_body
+
+interface_body
+	::=	LCURLYBRACE interface_method* RCURLYBRACE
+\end{lstlisting}
+
+\subsubsection{Context-beperkingen}
+Hier volgen de context-beperkingen voor de klassenstructuur.
+
+\begin{itemize}
+	\item Er mogen geen twee types met dezelfde naam gedefinieerd worden.
+	\item Er mogen geen twee members van klassen zijn met dezelfde naam en parameters.
+	\item De \textit{qualifier} bij de regel \textit{EXTENDS} bij een klassendeclaratie moet een andere bestaande klasse zijn.
+	\item De lijst met \textit{qualifier}s bij de regel \textit{IMPLEMENTS} bij een klassendeclaratie moeten allen andere bestaande interfaces zijn.
+	\item De qualifier bij de regel \textit{EXTENDS} bij een interfacedeclaratie moet een bestaande interface zijn.
+	\item Wanneer een interface ge\"implementeerd wordt door een klasse moet deze klasse alle methoden van de interface implementeren.
+	\item Wanneer een klasse een abstracte klasse uitbreid, moeten alle abstracte methoden ge\"implementeerd worden.
+\end{itemize}
+
+\subsubsection{Semantiek}
+De klassenstructuur kent de volgende semantische regels:
+
+\begin{itemize}
+	\item Een klassendeclaratie zorgt ervoor dat er een klasse in de huidige namespace wordt gedefineerd met de gegeven naam.
+	\item Een enumeratiedeclaratie zorgt ervoor dat er een enumeratie in de huidige namespace wordt gedefineerd met de gegeven naam.
+	\item Een interfacedeclaratie zorgt ervoor dat er een interface in de huidige namespace wordt gedefineerd met de gegeven naam.
+	\item Als een klasse of interface iets anders extend, dan betekent dat dat de members van de base class ook beschikbaar zijn in de hier gedefinieerde klasse.
+\end{itemize}
+
+\subsection{Klassenleden}
+Dit gedeelte handelt over de leden van klassen, interfaces en enumeraties. Dit kan onder andere een methode of een veld zijn.
+
+\subsubsection{Syntax}
+Hieronder volgt de syntax beschrijving in \textit{Extended Bachus Naur Form} van alle klassenleden gerelateerde regels.
+
+\begin{lstlisting}
+enum_body
+	::=	LCURLYBRACE (IDENTIFIER (COMMA IDENTIFIER)*)? RCURLYBRACE
+
+interface_method
+	::=	type_qualifier IDENTIFIER LPAREN parameter_list RPAREN SEMICOLON
+
+method_mod_list
+	::=	access_modifier (STATIC | virtual_modifier)?
+
+field_mod_list
+	::=	access_modifier STATIC? INITONLY?
+
+constructor_mod_list
+	::=	access_modifier
+
+abstract_mod_list
+	::=	access_modifier ABSTRACT
+
+type_list
+	::=	qualifier (COMMA qualifier)*
+
+class_element
+	::=	method_decl
+	|	constructor_decl
+	|	abstract_method_decl
+	|	field_decl
+	|	static_constructor
+
+static_constructor
+	::=	STATIC block_expression
+
+field_decl
+	::=	field_mod_list qualifier IDENTIFIER (COMMA IDENTIFIER)* SEMICOLON
+
+method_decl
+	::=	method_mod_list type_qualifier IDENTIFIER LPAREN parameter_list RPAREN block_expression
+
+abstract_method_decl
+	::=	abstract_mod_list type_qualifier IDENTIFIER LPAREN parameter_list RPAREN SEMICOLON
+
+constructor_decl
+	::=	constructor_mod_list IDENTIFIER LPAREN parameter_list RPAREN (COLON BASE LPAREN argument_list RPAREN)? block_expression
+
+parameter_list
+	::=	(qualifier IDENTIFIER (COMMA qualifier IDENTIFIER)*)?
+
+access_modifier
+	::=	PRIVATE | PUBLIC | PROTECTED | INTERNAL
+
+virtual_modifier
+	::=	VIRTUAL | OVERRIDE
+\end{lstlisting}
+
+\subsubsection{Context-beperkingen}
+De context-beperkingen van de klassenleden zijn als volgt:
+
+\begin{itemize}
+	\item Bij een enumeratie moeten alle \textit{IDENTIFIER}s verschillend zijn.
+	\item Alle type\_qualifiers moeten bestaande types zijn die beschikbaar zijn met de gebruikte imports.
+	\item Een klasse member mag alleen als \textit{ABSTRACT} gedefinieerd worden wanneer de klasse ook \textit{ABSTRACT} is.
+	\item De modifier \textit{OVERRIDE} mag alleen gebruikt worden wanneer een methode gedefinieerd wordt die in een superklasse als \textit{VIRTUAL} staat gemarkeerd.
+	\item Er mag per klasse maar \'e\'en \textit{STATIC} constructor zijn.
+\end{itemize}
+
+\subsubsection{Semantiek}
+De semantische regels voor de klassenleden zijn als volgt:
+
+\begin{itemize}
+	\item De modifier \textit{STATIC} betekent dat deze member zonder instantie van de klasse aanroepbaar is
+	\item De modifier \textit{OVERRIDE} betekent dat deze methode een member van een superklasse overschrijft
+	\item De modifier \textit{VIRTUAL} betekent dat deze methode overschrijfbaar is voor subklassen
+	\item De modifier \textit{ABSTRACT} betekent dat deze methode in een subklasse ge\"implementeerd moet worden
+	\item De modifier \textit{INITONLY} betekent dat dit veld enkel in een van de constructoren ge\"initializeerd mag worden. Daarna is dit niet meer mogelijk.
+	\item De modifier \textit{PRIVATE} betekent dat deze member alleen binnen de klasse zelf beschikbaar is
+	\item De modifier \textit{PUBLIC} betekent dat deze member overal beschikbaar is
+	\item De modifier \textit{PROTECTED} betekent dat deze member beschikbaar is in zowel de klasse zelf als subklassen
+	\item De modifier \textit{INTERNAL} betekent dat deze member overal in de assembly waarin hij is gedefinieerd beschikbaar is
+	\item Het defini\"eren van members heeft als gevolg dat deze methoden, fields of enumeraties op hun klasse aanroepbaar zijn.
+	\item Fields en methoden returnen een bepaald type, zoals hun \textit{type\_qualifier} aangeeft.
+\end{itemize}
+
+\subsection{Statements}
+In deze sectie worden de syntax, context-beperkingen en semantiek van statements uitgebreid toegelicht.
+
+\subsubsection{Syntax}
+Hieronder volgt de syntax beschrijving in \textit{Extended Bachus Naur Form} van alle statement gerelateerde regels.
+
+\begin{lstlisting}
+statement
+	::=	declaration_statement SEMICOLON
+	|	const_decl_statement SEMICOLON
+	|	expression SEMICOLON
+	|	SEMICOLON
+	|	control_statement
+
+control_statement
+	::=	while_statement
+	|	for_statement
+	|	try_statement
+	|	throw_statement
+
+throw_statement
+	::=	THROW expression SEMICOLON
+
+try_statement
+	::=	TRY block_expression (finally_block | (catch_block+ finally_block?))
+
+catch_block
+	::=	(CATCH | CAREBOX) LPAREN qualifier IDENTIFIER RPAREN block_expression
+
+finally_block
+	::=	FINALLY block_expression
+
+while_statement
+	::=	WHILE LPAREN scope_expr RPAREN block_expression
+
+for_statement
+	::=	FOR LPAREN qualifier IDENTIFIER IN expression RPAREN block_expression
+\end{lstlisting}
+
+\subsubsection{Context-beperkingen}
+De context-beperkingen van de statements zijn als volgt:
+
+\begin{itemize}
+	\item De expressie van een \textit{throw\_statement} moet een type opleveren dat van \textit{System.Exception} afstamt.
+	\item De \textit{qualifier} die in een \textit{catch\_block} staat moet van een type zijn dat van \textit{System.Exception} afstamt.
+	\item De \textit{scope\_expr} van een \textit{while\_statement} moet een \textit{System.Boolean} type opleveren.
+	\item De expression van een \textit{for\_statement} moet een type opleveren die de interface \textit{System.Collections.IEnumerable} implementeert.
+\end{itemize}
+
+\subsubsection{Semantiek}
+De semantische regels van de statements zijn als volgt:
+
+\begin{itemize}
+	\item Het \textit{throw\_statement} onderbreekt de programmauitvoering een gooit de exceptie die de expression oplevert.
+	\item Het \textit{try\_statement} begint een block die excepties kan afvangen. Excepties gespecificeerd een de catch blokken worden afgevangen.
+	\item Het \textit{catch\_block} specificeert de exceptie die wordt afgevangen. Excepties die van het type van \textit{qualifier} zijn, of van een subklasse hiervan worden afgevangen. Dit block wordt alleen uitgevoerd wanneer zo'n exceptie wordt gegooid.
+	\item Het \textit{try\_block} wordt altijd uitgevoerd, ook als er een exceptie is gegooid in het try gedeelte.
+	\item Declaraties gedaan in de \textit{scope\_expr} van een \textit{while\_statement} blijven het gehele while statement in scope.
+	\item De \textit{while\_statement} wordt net zolang uitgevoerd tot de scope\_expr false oplevert.
+	\item De \textit{for\_statement} itereert over alle object heen die de expression van \textit{System.Collections.IEnumerable} opleveren. De variabele met de naam van \textit{IDENTIFIER} wordt steeds geupdate met een van de object uit de lijst met object waar overheen ge\"itereerd wordt.
+\end{itemize}
+
+\subsection{Declaraties}
+In deze sectie worden declaraties, hun context-beperkingen en semantiek besproken.
+
+\subsubsection{Syntax}
+Hieronder volgt de syntax beschrijving in \textit{Extended Bachus Naur Form} van alle declaratie gerelateerde regels.
+
+\begin{lstlisting}
+declaration_statement
+	::=	qualifier IDENTIFIER BECOMES expression
+	|	qualifier IDENTIFIER (COMMA IDENTIFIER)*
+
+const_decl_statement
+	::=	CONST qualifier IDENTIFIER BECOMES const_value (COMMA IDENTIFIER BECOMES const_value)*
+
+const_value
+	::=	literal_value
+	|	LCURLYBRACE literal_value (COMMA literal_value)* RCURLYBRACE
+\end{lstlisting}
+
+\subsubsection{Context-beperkingen}
+De context-beperkingen van de declaraties zijn als volgt:
+
+\begin{itemize}
+	\item Bij een declaratie mag het niet zo zijn dat er in dezelfde scope al een andere declaratie met dezelfde \textit{IDENTIFIER} bestaat.
+	\item Wanneer een declaratie van een variabele of constante gelijk ge\"initializeerd wordt moet de \textit{expression} van hetzelfde type zijn als het type van de variabele die gedeclareerd wordt.
+\end{itemize}
+
+\subsubsection{Semantiek}
+De semantische regels van de declaraties zijn als volgt:
+
+\begin{itemize}
+	\item De declaratie van een variabele zorgt ervoor dat deze variabele later kan worden gebruikt in expressies. De variabele wordt van het gespecificeerde type.
+	\item De declaratie van een constante zorgt ervoor dat deze constante in expressies gebruikt kan worden. De waarde van deze constante wordt direct gebruikt in de code.
+	\item Wanneer de constante een array type is kan in het vervolg alleen aan elementen van die array gerefereerd worden.
+\end{itemize}
+
+\subsection{Expressies}
+Gezien VNVD een expressie taal is, kent de taal vele expressies. Een expressie is een operatie die een waarde achter laat op de stack van de virtuele machine.
+
+\subsubsection{Syntax}
+Hieronder volgt de syntax beschrijving in \textit{Extended Bachus Naur Form} van alle expressie gerelateerde regels.
+
+\begin{lstlisting}
+expression
+	::=	assignment_expression
+
+scope_expr
+	::=	statement+
+
+assignment_expression
+	::=	ternary_expression BECOMES assignment_expression
+	|	ternary_expression (ADDEVENT | REMEVENT) assignment_expression
+	|	ternary_expression 
+
+object_creation_expression
+	::=	NEW qualifier LPAREN argument_list RPAREN
+
+array_creation_expression_elemented
+	::=	NEW qualifier LCURLYBRACE expression (COMMA expression)* RCURLYBRACE
+
+array_creation_expression
+	::=	NEW qualifier LBRACKET expression RBRACKET
+
+ternary_expression
+	::=	IF LPAREN scope_expr RPAREN THEN expression (ELSE expression)? FI
+	|	conditional_or_operator_expression
+
+conditional_or_operator_expression
+	::=	conditional_and_operator_expression (OR conditional_and_operator_expression)*
+
+conditional_and_operator_expression
+	::=	logic_or_operator_expression (AND logic_or_operator_expression)*
+
+logic_or_operator_expression
+	::=	logic_xor_operator_expression (LOR logic_xor_operator_expression)*
+
+logic_xor_operator_expression
+	::=	logic_and_operator_expression (LXOR logic_and_operator_expression)*
+
+logic_and_operator_expression
+	::=	logic_expression (LAND logic_expression)*
+
+logic_expression
+	::=	cast_as_expression ((LE | LEQ | GE | GEQ | EQ | NEQ) cast_as_expression)*
+
+cast_as_expression
+	::=	primary_expression ((AS | IS) qualifier)*
+
+primary_expression
+	::=	secundary_expression ((PLUS | MINUS) secundary_expression)*
+
+secundary_expression
+	::=	logicnotoperator_expression ((MULTIPLY | DIVISION | MOD) logicnotoperator_expression )*
+
+logicnotoperator_expression
+	::=	(NOT | PLUS | MINUS)* cast_expression
+
+cast_expression
+	::=	(LPAREN qualifier RPAREN cast_expression)
+	|	invocation_or_load_expression
+
+invocation_or_load_expression
+	::=	operand ((DCOLON IDENTIFIER (LPAREN argument_list RPAREN)?) | (LBRACKET expression RBRACKET))*
+
+argument_list
+	::=	(expression (COMMA expression)*)?
+
+operand
+	::=	qualifier
+	|	literal_value
+	|	THIS
+	|	BASE
+	|	object_creation_expression
+	|	array_creation_expression
+	|	array_creation_expression_elemented
+	|	READ LPAREN IDENTIFIER RPAREN
+	|	READ LPAREN IDENTIFIER (COMMA IDENTIFIER)+ RPAREN
+	|	WRITE LPAREN expression RPAREN
+	|	WRITE LPAREN expression (COMMA expression)+ RPAREN
+	|	LPAREN expression RPAREN
+	|	block_expression
+
+literal_value
+	::=	NUMBER
+	|	FLOAT
+	|	STRING
+	|	CHAR
+	|	TRUE
+	|	FALSE
+	|	NULL
+
+block_expression
+	::=	LCURLYBRACE statement* RCURLYBRACE
+\end{lstlisting}
+
+\subsubsection{Context-beperkingen}
+De context-beperkingen voor de expressie regels zijn als volgt:
+
+\begin{itemize}
+	\item In het geval van een \textit{assignment\_expression} zijn er twee mogelijke context beperkingen. Indien de regel een \textit{BECOMES} token bevat dienen beide zijden van hetzelfde type te zijn. De linker zijde moet dan ook assignable zijn. In het geval dat er een \textit{ADDEVENT} of \textit{REMEVENT} staat dient de linker zijde een event te zijn en de rechterzijde van het type \textit{System.EventHandler} te zijn.
+	\item In een \textit{object\_creation\_expression} dient de \textit{qualifier} de naam van een bestaande klasse te zijn. Daarnaast dient de \textit{argument\_list} ofwel leeg, ofwel passend te zijn op de parameters van een bestaande constructor van de klasse waarnaar de \textit{qualifier} wijst.
+	\item De \textit{qualifier} in een \textit{array\_creation\_expression\_elemented} dient te verwijzen naar een bestaand array type. Daarnaast dienen de typen van alle \textit{expression}s gelijk te zijn aan het enkele type van de \textit{qualifier} die vooraan staat.
+	\item De \textit{qualifier} in een \textit{array\_creation\_expression} dient te verwijzen naar een bestaand type. Daarnaast dient de \textit{expression} van het type \textit{System.Int32} te zijn en daarnaast ook nog een positief getal te zijn.
+	\item Een \textit{ternary\_expression} vereist dat de gebruikte \textit{scope\_expr} van het type \textit{System.Boolean} is.
+	\item Voor de \textit{conditional\_and\_operator\_expression} gelden dezelfde beperkingen als voor de \textit{conditional\_or\_operator\_expression}, namelijk dat beide zijden van de expressie van het type \textit{System.Boolean} dienen te zijn. Deze context beperking geldt echter niet als in de regel de tokens \textit{AND} en \textit{OR} niet voor komen.
+	\item Voor de \textit{logic\_and\_operator\_expression}, de \textit{logic\_or\_operator\_expression} en de \textit{logic\_xor\_operator\_expression} geldt dat beide zijden van de expressie van hetzelfde type dienen te zijn. Daarnaast dienen beiden van een primitief type te zijn of een type dat, afhankelijk van de gebruikte tokens de volgende methode kent:
+	\begin{description}
+		\item[\textit{LAND}] static \textless{}Type\textgreater{} op\_BitwiseAnd(\textless{}Type\textgreater{}, \textless{}Type\textgreater{})
+		\item[\textit{LOR}] static \textless{}Type\textgreater{} op\_BitwiseOr(\textless{}Type\textgreater{}, \textless{}Type\textgreater{})
+		\item[\textit{LXOR}] static \textless{}Type\textgreater{} op\_ExclusiveOr(\textless{}Type\textgreater{}, \textless{}Type\textgreater{})
+	\end{description}
+	Indien er geen token gebruikt wordt in de regel geldt deze beperking niet.
+	\item De beide zijden van een \textit{logic\_expression} dienen van hetzelfde type te zijn. Daarnaast dienen beiden van een primitief type te zijn of een type dat, afhankelijk van de gebruikte tokens de volgende methode kent:
+	\begin{description}
+		\item[\textit{LE}] static \textless{}Type\textgreater{} op\_LessThan(\textless{}Type\textgreater{}, \textless{}Type\textgreater{})
+		\item[\textit{LEQ}] static \textless{}Type\textgreater{} op\_LessThanOrEqual(\textless{}Type\textgreater{}, \textless{}Type\textgreater{})
+		\item[\textit{GE}] static \textless{}Type\textgreater{} op\_GreaterThan(\textless{}Type\textgreater{}, \textless{}Type\textgreater{})
+		\item[\textit{GEQ}] static \textless{}Type\textgreater{} op\_GreaterThanOrEqual(\textless{}Type\textgreater{}, \textless{}Type\textgreater{})
+		\item[\textit{EQ}] static \textless{}Type\textgreater{} op\_Equality(\textless{}Type\textgreater{}, \textless{}Type\textgreater{})
+		\item[\textit{NEQ}] static \textless{}Type\textgreater{} op\_Inequality(\textless{}Type\textgreater{}, \textless{}Type\textgreater{})
+	\end{description}
+	Indien er geen token gebruikt wordt in de regel geldt deze beperking niet.
+	\item De \textit{qualifier} in de \textit{cast\_as\_expression} dient te verwijzen naar dezelfde klasse als, een superklasse van of een interface ge\"implementeerd door het type van de linker zijde van de expressie.
+	\item Beide zijden in een \textit{primary\_expression} dienen van hetzelfde type te zijn, indien de regel het token \textit{PLUS} of het token \textit{MINUS} bevat. In dat geval dienen beide typen ook ofwel primair ofwel van een type dat de bijbehorende functie implementeerd te zijn:
+	\begin{description}
+		\item[\textit{PLUS}] static \textless{}Type\textgreater{} op\_Addition(\textless{}Type\textgreater{}, \textless{}Type\textgreater{})
+		\item[\textit{MINUS}] static \textless{}Type\textgreater{} op\_Substraction(\textless{}Type\textgreater{}, \textless{}Type\textgreater{})
+	\end{description}
+	\item De beide zijden van een \textit{secundary\_expression} dienen van hetzelfde type te zijn. Daarnaast dienen beiden van een primitief type te zijn of een type dat, afhankelijk van de gebruikte tokens de volgende methode kent:
+	\begin{description}
+		\item[\textit{MULTIPLY}] static \textless{}Type\textgreater{} op\_Multiply(\textless{}Type\textgreater{}, \textless{}Type\textgreater{})
+		\item[\textit{DIVISION}] static \textless{}Type\textgreater{} op\_Division(\textless{}Type\textgreater{}, \textless{}Type\textgreater{})
+		\item[\textit{MOD}] static \textless{}Type\textgreater{} op\_Modulus(\textless{}Type\textgreater{}, \textless{}Type\textgreater{})
+	\end{description}
+	Indien er geen token gebruikt wordt in de regel geldt deze beperking niet.
+	\item De gebruikte \textit{cast\_expression} in een \textit{logicnotoperator\_expression} dient van een primitief type te zijn of van een type dat, afhankelijk van de gebruikte tokens de volgende methoden kent:
+	\begin{description}
+		\item[\textit{NOT}] static \textless{}Type\textgreater{} op\_LogicalNot(\textless{}Type\textgreater{}, \textless{}Type\textgreater{})
+		\item[\textit{PLUS}] static \textless{}Type\textgreater{} op\_UnaryPlus(\textless{}Type\textgreater{}, \textless{}Type\textgreater{})
+		\item[\textit{MINUS}] static \textless{}Type\textgreater{} op\_UnaryNegation(\textless{}Type\textgreater{}, \textless{}Type\textgreater{})
+	\end{description}
+	Indien er geen token gebruikt wordt in de regel geldt deze beperking niet.
+	\item De \textit{qualifier} in de \textit{cast\_expression} dient te verwijzen naar dezelfde klasse als, een superklasse van of een interface ge\"implementeerd door het type van de rechter zijde van de expressie.
+	\item De regel \textit{invocation\_or\_load\_expression} kent twee verschillende constructies met hun eigen context-beperkingen. Voor het gebruik van de token \textit{DCOLON} geldt dat de \textit{IDENTIFIER} moet refereren naar een methode van het type van de \textit{operand}, daarnaast moeten de parameters van deze methoden ook te vullen zijn op basis van de argumenten uit de \textit{argument\_list}. Indien de token \textit{LBRACKET} wordt tegen gekomen moet de \textit{operand} van een array type zijn. Daarnaast dient de \textit{expression} dan een positieve \textit{System.Int32} terug te geven.
+	\item Een \textit{argument\_list} wordt enkel in invocaties gebruikt. Deze dient dan overeen te komen met de parameters van de methode (of constructor) die aangeroepen wordt. In dit geval betekent dit de \textit{argument\_list} even veel \textit{expression}s kent als de \textit{parameter\_list} \textit{IDENTIFIER}s. Daarnaast dienen de typen van de, respectievelijke, \textit{expression}s gelijk te zijn aan, of te verwijzen naar superklassen danwel interfaces van, de aldaar door de \textit{qualifier}s aangewezen typen.
+	\item In de \textit{operand} regels geldt dat alle \textit{IDENTIFIER}s gebruikt bij een \textit{READ} van het type \textit{System.Int32}, \textit{System.Char} of \textit{System.String} dienen te zijn.
+\end{itemize}
+
+\subsubsection{Semantiek}
+De semantische regels zijn als volgt:
+
+\begin{itemize}
+	\item Een \textit{assignment\_expression} waarin de token \textit{BECOMES} gebruikt wordt wijst de waarde van de rechter zijde toe aan de variabele of het veld gespecificeerd door de linker zijde. Daarnaast retourneert de expressie de waarde van de rechter zijde. In het geval van een \textit{ADDEVENT} wordt de event handler aan de rechter zijde gekoppeld aan het links gespecificeerde event. Indien het een \textit{REMEVENT} betreft wordt de event handler juist verwijderd. Beiden retourneren niets.
+	\item Een \textit{object\_creation\_expression} maakt een nieuw object aan van het door de \textit{qualifier} gespecificeerde type. Daarnaast wordt de constructor aangeroepen met de argumenten uit de \textit{argument\_list}. Het nieuwe object wordt vervolgens op de stack geplaatst.
+	\item Een \textit{array\_creation\_expression\_elemented} maakt een array aan met als elementen de waarden uit de verscheidene \textit{expression}s. Deze array wordt daarna terug gegeven.
+	\item Een \textit{array\_creation\_expression} cre\"eert een array met een grootte gelijk aan de waarde van de \textit{expression}. Daarna wordt de gemaakte array geretourneerd.
+	\item De \textit{ternary\_expression} opent eerst een nieuwe scope. Vervolgens wordt de \textit{scope\_expr} ge\"evalueerd. Indien deze waar wordt bevonden wordt een nieuwe scope geopend en de eerste \textit{expression} uitgevoerd. Daarna wordt de scope weer gesloten. Indien de \textit{scope\_expr} negatief wordt bevonden en er een \textit{ELSE} bestaat wordt een nieuwe scope geopend en de tweede \textit{expression} uitgevoerd en wederom de scope gesloten. Als deze er echter niet is wordt er niets gedaan. Tot slot wordt de laatste scope gesloten. Deze expressie geeft niets terug, behalve als beide \textit{expression}s van hetzelfde type zijn. In dat geval blijft de waarde geretourneerde door de uitgevoerde \textit{expression} op de stack staan.
+	\item Een \textit{conditional\_or\_operator\_expression} wordt lazy ge\"evalueerd. Dit betekent dat eerst de linker zijde wordt ge\"evalueerd. Als deze waar oplevert wordt er waar terug gegeven. Anders wordt de rechter zijde ge\"evalueerd en de uitkomst daarvan terug gegeven.
+	\item Een \textit{conditional\_and\_operator\_expression} wordt lazy ge\"evalueerd. Dit betekent dat eerst de linker zijde wordt ge\"evalueerd. Als deze onwaar oplevert wordt er onwaar terug gegeven. Anders wordt de rechter zijde ge\"evalueerd en de uitkomst daarvan terug gegeven.
+	\item Een \textit{logic\_or\_operator\_expression} levert de waarde op van de logic or van zijn twee zijden.
+	\item Een \textit{logic\_xor\_operator\_expression} levert de waarde op van de logic xor van zijn twee zijden.
+	\item Een \textit{logic\_and\_operator\_expression} levert de waarde op van de logic and van zijn twee zijden.
+	\item Een \textit{logic\_expression} levert de waarde op van zijn twee zijden vergeleken met elkaar. Dit gebeurt volgens de operator die daar gebruikt wordt. Dit is \'e\'en van: \textit{LE}, \textit{LEQ}, \textit{GE}, \textit{GEQ}, \textit{EQ} of \textit{NEQ}.
+	\item Een \textit{cast\_as\_expression} verandert het type van de expressie waar hij op gebruikt wordt. Het type van deze expressie is gelijk aan het type van zijn \textit{qualifier}. Wanneer het niet mogelijk is om te casten levert deze null op.
+	\item Een \textit{primary\_expression} telt twee waarden bij elkaar op, of trekt ze van elkaar af. Het resultaat hiervan blijft achter op de stack.
+	\item Een \textit{secundary\_expression} voert een vermenigvuldiging op twee waarden uit, deelt ze of neemt de modulus ervan. Het resultaat blijft achter op de stack.
+	\item Een \textit{logicnotoperator\_expression} inverteert de waarde waar hij op uitgevoerd wordt, of levert hiervan de unaire plus of negatie op.
+	\item Een \textit{cast\_expression} verandert het type van een \textit{expression}. Het type van deze expressie is gelijk aan het type van zijn \textit{qualifier}. Wanneer het niet mogelijk is om te casten wordt een exceptie gegooid.
+	\item Een \textit{invocation\_or\_load\_expression} roept ofwel een methode aan, of laadt een veld. Het type van deze expressie is ofwel de return type van de methode, of die van het veld dat hij laadt. Een methode wordt aangeroepen met de parameters die meegegeven zijn. Deze worden eerst ge\"evalueerd.
+	\item Een \textit{literal\_value} laadt een waarde van een literal op de stack.
+	\item Het keyword \textit{THIS} laadt de waarde van de klasse waarin hij zit op de stack.
+	\item Het keyword \textit{BASE} geeft aan dat methoden uit de superklasse van de klasse moeten worden aangeroepen. Dit wordt gebruikt bij invocaties.
+	\item De \textit{READ} functie leest een waarde van de standaardinvoer en plaatst deze in meegegeven identifier. Ook laat hij de waarde achter op de stack wanneer er slechts \'e\'en parameter is.
+	\item De \textit{WRITE} functie schrijft een waarde naar de standaarduitvoer. Ook laat hij de waarde achter op de stack wanneer er slechts \'e\'en parameter is.
+\end{itemize}
+
+\subsection{Qualifiers}
+Qualifiers zijn volledige plaats aanduidingen naar typen. Een qualifier wordt dus gebruikt om de locatie van een klasse, enumeratie, interface of dergelijke te vinden.
+
+\subsubsection{Syntax}
+Hieronder volgt de syntax beschrijving in \textit{Extended Bachus Naur Form} van alle qualifier gerelateerde regels.
+
+\begin{lstlisting}
+type_qualifier
+	::=	VOID
+	|	qualifier
+
+qualifier
+	::=	(IDENTIFIER (PERIOD IDENTIFIER)* (LBRACKET RBRACKET))
+	|	IDENTIFIER (PERIOD IDENTIFIER)*
+\end{lstlisting}
+
+\subsubsection{Context-beperkingen}
+De qualifiers kennen geen directe context-beperkingen. Er gelden wel context-beperkingen die voort komen uit de wijze waarop de regels gebruikt worden. Deze beperking staan dan bij de desbetreffende regels beschreven.
+
+\subsubsection{Semantiek}
+Een qualifier geldt als een aanduiding van een type. Een qualifier bestaat dus uit nul of meer namespace identifiers, gescheiden door punten, gevolgd door een punt en de identifier van een type. De regel \textit{type\_qualifier} introduceert hierbij de aanduiding \textit{VOID} wat naar niets wijst.
+
+\subsection{Lexicon}
+Op het lexicale niveau bestaat het programma uit een set tokens (die gedeeltelijk onder sectie tokens staan), commentaar regels, witte ruimte en literals.
+
+\subsubsection{Syntax}
+Hieronder volgt de syntax beschrijving in \textit{Extended Bachus Naur Form} van alle lexicon gerelateerde regels.
+
+\begin{lstlisting}
+IDENTIFIER
+	::=	(LETTER | '_') (LETTER | DIGIT | '_')*
+
+STRING
+	::=	('"' (QUOTED_CHARACTER | ~('"' | '\\'))* '"')
+
+CHAR
+	::=	'\'' (QUOTED_CHARACTER | ~('\'' | '\\')) '\''
+
+QUOTED_CHARACTER
+	::=	'\\' .
+
+NUMBER
+	::=	(MINUS | PLUS)? DIGIT+
+
+FLOAT
+	::=	(MINUS | PLUS)? DIGIT+ '.' DIGIT+
+
+DIGIT
+	::=	('0'..'9')
+
+LOWER
+	::=	('a'..'z')
+
+UPPER
+	::=	('A'..'Z')
+
+LETTER
+	::=	LOWER
+	|	UPPER
+
+COMMENT
+	::=	'//' .* '\n' 
+	|	'/*' .* '*/'
+
+WHITESPACE
+	::=   (' ' | '\t' | '\f' | '\r' | '\n')+
+\end{lstlisting}
+
+\subsubsection{Context-beperkingen}
+De lexicon regels kennen geen context beperkingen.
+
+\subsubsection{Semantiek}
+Er zijn enkele semantische regels voor het lexicon. Deze zijn als volgt:
+
+\begin{itemize}
+	\item De waarde van een \textit{STRING} is gelijk aan de achtereenvolgende tekens tussen de beide quotes in. Hierbij dienen de waarden van de \textit{QUOTED\_CHARACTER} tekens te worden meegenomen.
+	\item De waarde van een \textit{CHAR} is gelijk aan het teken tussen de beide enkele quotes in. Indien deze een \textit{QUOTED\_CHARACTER} bevat is dit gelijk aan de waarde van die specifieke \textit{QUOTED\_CHARACTER}.
+	\item De waarde van een \textit{QUOTED\_CHARACTER} is als volgt:
+	\begin{description}
+		\item[\textbackslash'] De waarde is een enkele quote (').
+		\item[\textbackslash"] De waarde is een dubbele quote (").
+		\item[\textbackslash\textbackslash] De waarde is een backslash (\textbackslash).
+		\item[\textbackslash0] De waarde is een null byte.
+		\item[\textbackslash{}a] De waarde is gelijk aan een systeem alert. Dit is over het algemeen een pieptoon gemaakt door de systeem speaker.
+		\item[\textbackslash{}b] Dit genereert een backspace.
+		\item[\textbackslash{}f] Dit heeft een formfeed als waarde.
+		\item[\textbackslash{}n] De waarde is een newline.
+		\item[\textbackslash{}r] De waarde is een carriage return.
+		\item[\textbackslash{}t] Hiervan is de waarde een tab.
+		\item[\textbackslash{}v] Dit heeft een verticale tab als waarde.
+		\item[\textbackslash{}x\textless4 hexadecimale tekens\textgreater] De waarde hiervan is het \textit{ASCII} teken corresponderend met de hexadecimale reeks.
+		\item[\textbackslash{}u\textless4 hexadecimale tekens\textgreater] De waarde hiervan is het \textit{Unicode} teken corresponderend met de hexadecimale reeks.
+		\item[\textbackslash{}U\textless8 hexadecimale tekens\textgreater] De waarde hiervan is het \textit{Unicode} teken corresponderend met de hexadecimale reeks.
+	\end{description}
+	Alle overige waarden zijn niet toegestaan.
+	\item Een \textit{NUMBER} heeft de numerieke waarde van de bijbehorende tekenreeks. Hierin gelden de mogelijke + en - als respectievelijk de positieve of de negatieve waarde van het getal.
+	\item De waarde van een \textit{FLOAT} is gelijk aan het drijvende kommagetal dat de bijbehorende tekens vormen. Ook hierin gelden de mogelijke + en - als respectievelijk de positieve of de negatieve waarde van het getal.
+\end{itemize}
+
+
+\subsection{Tokens}
+De taal VNVD gebruikt ook nog een aantal tokens, die gebruikt worden in de geschreven code. Deze zijn als volgt:
+
+\begin{lstlisting}
+ABSTRACT = 'abstract'
+ADDEVENT = '+='
+AND = '&&'
+AS = 'as'
+BASE = 'base'
+BECOMES = '='
+CAREBOX = 'carebox'
+CATCH = 'catch'
+CLASS = 'class'
+COLON = ':'
+COMMA = ','
+CONST = 'const'
+DCOLON = '::'
+DIVISION = '/'
+ELSE = 'else'
+ENUM = 'enum'
+EQ = '=='
+EXTENDS = 'extends'
+FALSE = 'false'
+FI = 'fi'
+FINALLY = 'finally'
+FOR = 'for'
+GE = '>'
+GEQ = '>='
+IF = 'if'
+IMPLEMENTS = 'implements'
+IN = 'in'
+INITONLY = 'initonly'
+INTERFACE = 'interface'
+INTERNAL = 'internal'
+IS = 'is'
+LAND = '&'
+LBRACKET = '['
+LCURLYBRACE = '{'
+LE = '<'
+LEQ = '<='
+LOR = '|'
+LPAREN = '('
+LXOR = '^'
+MINUS = '-'
+MOD = '%'
+MULTIPLY = '*'
+NAMESPACE = 'namespace'
+NEQ = '!='
+NEW = 'new'
+NOT = '!'
+NULL =  'null'
+OR = '||'
+OVERRIDE = 'override'
+PERIOD = '.'
+PLUS = '+'
+PRINT = 'print'
+PRIVATE = 'private'
+PROTECTED = 'protected'
+PUBLIC = 'public'
+QUESTION = '?'
+RBRACKET = ']'
+RCURLYBRACE = '}'
+READ = 'read'
+READ = 'read'
+REMEVENT = '-='
+RETURN = 'return'
+RPAREN = ')'
+SEMICOLON = ''
+STATIC = 'static'
+STATIC = 'static'
+THEN = 'then'
+THIS = 'this'
+THROW = 'throw'
+TILDE = '~'
+TRUE = 'true'
+TRY = 'try'
+USING = 'import'
+VIRTUAL = 'virtual'
+VOID = 'void'
+WHILE = 'while'
+WRITE = 'write'
+\end{lstlisting}

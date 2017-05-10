@@ -1,0 +1,34 @@
+import System;
+
+namespace BoterKaasEieren
+{
+   class public abstract Speler
+   {
+      private String naam;
+      private Mark mark;
+      
+      protected Speler(String naam, Mark mark)
+      {
+         this::naam = naam;
+         this::mark = mark;
+      }
+      
+      public void DoeZet(Bord bord)
+      {
+         Int32 i = this::BepaalZet(bord);
+         bord::SetVakje(i, this::mark);
+      }
+      
+      public String GetNaam()
+      {
+         this::naam;
+      }
+      
+      public Mark GetMark()
+      {
+         this::mark;
+      }
+      
+      public abstract Int32 BepaalZet(Bord bord);
+   }
+}

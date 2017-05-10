@@ -1,0 +1,39 @@
+import System;
+import System.Threading;
+
+namespace BoterKaasEieren
+{
+   class public MensSpeler extends Speler
+   {
+      private Int32 tempMove;
+      
+      public MensSpeler(String naam, Mark mark) : base(naam, mark)
+      {
+         this::tempMove = -1;
+      }
+      
+      public override Int32 BepaalZet(Bord bord)
+      {
+         Monitor::Enter(this);
+         while (!bord::IsCorrecteZet(this::tempMove);)
+         {
+            Monitor::Wait(this);
+         };
+         
+         Monitor::Exit(this);
+         Int32 ret = this::tempMove;
+         this::tempMove = -1;
+         ret;
+      }
+      
+      public Int32 GetTempMove()
+      {
+         this::tempMove;
+      }
+      
+      public void SetTempMove(Int32 tempMove)
+      {
+         this::tempMove = tempMove;
+      }
+   }
+}

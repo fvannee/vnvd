@@ -1,0 +1,54 @@
+
+   (PROGRAM 
+      (import 
+         (FQUALIFIER System)) 
+      (import 
+         (FQUALIFIER System Drawing)) 
+      (import 
+         (FQUALIFIER System Collections)) 
+      (import 
+         (FQUALIFIER System ComponentModel)) 
+      (import 
+         (FQUALIFIER System Windows Forms)) 
+      (import 
+         (FQUALIFIER System Data)) 
+      (import 
+         (FQUALIFIER System Timers)) 
+      (import 
+         (FQUALIFIER DebugLib)) 
+      (namespace 
+         (FQUALIFIER BouncingBall) 
+         (class 
+            (MODIFIERS public) 
+            (FQUALIFIER Ex1) 
+            (FIELD 
+               (MODIFIERS private static) 
+               (FQUALIFIER String) t) 
+            (FIELD 
+               (MODIFIERS private) 
+               (FQUALIFIER String) l) 
+            (METHOD 
+               (MODIFIERS public static) void Main PARAMETER 
+               (SLIST 
+                  (LOCAL 
+                     (FQUALIFIER Int32) i) 
+                  (= 
+                     (USAGE 
+                        (FQUALIFIER i)) 1) 
+                  (CALL 
+                     (USAGE 
+                        (FQUALIFIER Console)) WriteLine 
+                     (ALIST 
+                        (ARGUMENT 
+                           (CALL 
+                              (USAGE 
+                                 (FQUALIFIER i)) ToString ALIST)))) 
+                  (CALL 
+                     (CALL 
+                        (USAGE 
+                           (FQUALIFIER Ex1)) Jojo ALIST) ToString ALIST))) 
+            (METHOD 
+               (MODIFIERS public static) 
+               (FQUALIFIER Int32) Jojo PARAMETER 
+               (SLIST 1)))))
+

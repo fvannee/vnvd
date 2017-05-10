@@ -1,0 +1,3217 @@
+\section{Uitgebreid testprogramma}
+In deze sectie volgt de volledige broncode en gebruikshandleiding van het uitgebreide testprogramma. Dit testprogramma is een implementatie van het bekende spelletje \textit{Boter, Kaas en Eieren}. Het bijbehorende testplan en de testresultaten zijn in het verslag zelf terug te vinden.
+
+\subsection{Broncode}
+De broncode van het uitgebreide testprogramma, \textit{Boter, Kaas en Eieren}, bestaat uit verscheidene bestanden. Deze staan hieronder op alfabetische volgorde gegeven.
+
+\subsubsection{BesteStrategie.vnvd}
+De broncode van \textit{BesteStrategie.vnvd} is als volgt:
+
+% BesteStrategie.vnvd, r136, floris, 2009-06-27 21:29:33 +0200
+\begin{lstlisting}
+import System;
+import System.Collections;
+import System.Drawing;
+import System.Timers;
+import System.Windows.Forms;
+import System.ComponentModel;
+
+namespace BoterKaasEieren
+{
+	class public BesteStrategie implements IStrategie
+	{
+	   private Mark dezeSpeler;
+	   private Random random;
+	   
+	   public BesteStrategie()
+	   {
+	      this::random = new Random();
+	   }
+	   
+	   public Int32 BerekenZet(Bord bord, Mark mark)
+	   {
+	      this::dezeSpeler = mark;
+	      this::_berekenZet(bord, mark)::zet;
+	   }
+	   
+	   private Zet _berekenZet(Bord bord, Mark mark)
+	   {
+	      Boolean cont = true;
+	      Zet besteZet = null;
+	      Int32 count = 0;
+	      Int32 offset = this::random::Next(Bord::DIM * Bord::DIM);
+	      while (count < Bord::DIM * Bord::DIM && cont;)
+	      {
+	         Int32 i = (count + offset) % (Bord::DIM * Bord::DIM);
+	         if (bord::IsLeegVakje(i);) then
+	         {
+	            Zet zet = new Zet();
+	            zet::zet = i;
+	            
+	            bord::SetVakje(i, mark);
+	            if (bord::GameOver();) then
+	            {
+	               if (bord::HeeftGewonnen(mark);) then
+	               {
+	                  cont = false;
+	                  zet::waarde = 1;
+	               }
+	               else
+	               {
+	                  zet::waarde = 0;
+	               } fi;
+	            }
+	            else
+	            {
+	               zet::waarde = -this::_berekenZet(bord, mark::Other())::waarde;
+	            } fi;
+	            
+	            if (besteZet == null || zet::waarde > besteZet::waarde;) then
+	            {
+	               besteZet = zet;
+	            } fi;
+	            bord::SetVakje(i, Mark::EMPTY);
+	         } fi;
+	         count = count + 1;
+	      }
+	      besteZet;
+	   }
+	}
+
+   class public Zet
+   {      
+      public Int32 zet;
+      public Int32 waarde;
+   }
+}
+\end{lstlisting}
+
+\subsubsection{BkeGui.vnvd}
+De broncode van \textit{BkeGui.vnvd} is als volgt:
+
+% BkeGui.vnvd, r210, floris, 2009-07-12 15:07:37 +0200
+\begin{lstlisting}
+import System;
+import System.Collections;
+import System.Drawing;
+import System.Timers;
+import System.Windows.Forms;
+import System.Drawing;
+import System.Threading;
+
+namespace BoterKaasEieren
+{
+	class public BkeGui extends Form implements IMessageListener
+	{
+	   private Spel spel;
+	   
+	   private Button button;
+	   private Button[] tiles;
+	   private Label label;
+	   
+	   private RadioButton s1radio1, s1radio2, s1radio3;
+	   private RadioButton s2radio1, s2radio2, s2radio3;
+	   
+	   public static void Main()
+	   {
+	      Application::Run(new BkeGui());
+	   }
+	   
+	   public BkeGui()
+	   {  
+	      this::set_Text("Boter Kaas Eieren");
+         this::set_Size(new Size(350, 300));
+
+         Panel panel = new Panel();
+         panel::set_Size(new Size(80, 80));
+         panel::set_Location(new Point(10, 10));
+         this::get_Controls()::Add(panel);
+         
+         Label l = new Label();
+         l::set_Text("Speler 1");
+         panel::get_Controls()::Add(l);
+         
+         this::s1radio1 = new RadioButton();
+         this::s1radio1::set_Text("Human");
+         this::s1radio1::set_Checked(true);
+         this::s1radio1::set_Location(new Point(0, 20));
+         panel::get_Controls()::Add(this::s1radio1);
+
+         this::s1radio2 = new RadioButton();
+         this::s1radio2::set_Text("Domme AI");
+         this::s1radio2::set_Location(new Point(0, 40));
+         panel::get_Controls()::Add(this::s1radio2);
+         
+         this::s1radio3 = new RadioButton();
+         this::s1radio3::set_Text("Slimme AI");
+         this::s1radio3::set_Location(new Point(0, 60));
+         panel::get_Controls()::Add(this::s1radio3);
+                 
+         panel = new Panel();
+         panel::set_Size(new Size(80, 80));
+         panel::set_Location(new Point(100, 10));
+         this::get_Controls()::Add(panel);
+         
+         l = new Label();
+         l::set_Text("Speler 2");
+         panel::get_Controls()::Add(l);
+         
+         this::s2radio1 = new RadioButton();
+         this::s2radio1::set_Text("Human");
+         this::s2radio1::set_Checked(true);
+         this::s2radio1::set_Location(new Point(0, 20));
+         panel::get_Controls()::Add(this::s2radio1);
+
+         this::s2radio2 = new RadioButton();
+         this::s2radio2::set_Text("Domme AI");
+         this::s2radio2::set_Location(new Point(0, 40));
+         panel::get_Controls()::Add(this::s2radio2);
+         
+         this::s2radio3 = new RadioButton();
+         this::s2radio3::set_Text("Slimme AI");
+         this::s2radio3::set_Location(new Point(0, 60));
+         panel::get_Controls()::Add(this::s2radio3);
+         
+         panel = new Panel();
+         panel::set_Size(new Size(250, 250));
+         panel::set_Location(new Point(25, 110));
+         this::get_Controls()::Add(panel);
+	      
+	      this::tiles = new Button[9];
+	      Int32 i = 0;
+	      while (i < 9;)
+	      {
+	         Button b = new Button();
+	         this::tiles[i] = b;
+	         b::set_Name(i::ToString());
+	         b::set_Text(i::ToString());
+	         b::set_Size(new Size(40, 40));
+	         b::set_Location(new Point((i % 3) * 40, (i / 3) * 40));
+	         b::set_Enabled(false);
+	         b::Click += new EventHandler(this::move_Clicked);
+	         panel::get_Controls()::Add(b);
+	         i = i + 1;
+	      }
+	      this::button = new Button();
+	      this::button::set_Location(new Point(180, 20));
+	      this::button::set_Text("Start!");
+	      this::button::Click += new EventHandler(this::button_Clicked);
+	      this::get_Controls()::Add(this::button);
+	      
+	      this::label = new Label();
+	      this::label::set_Text("Press the start button!");
+	      this::label::set_Location(new Point(180, 50));
+	      this::label::set_AutoSize(true);
+	      this::get_Controls()::Add(this::label);
+	   }
+	   
+	   public void MessageReceived(Object message)
+	   {
+	      if (message == null;) then
+	      {
+	         Int32 i = 0;
+	         while (i < 9;)
+	         {
+	            this::tiles[i]::set_Text(i::ToString());
+	            this::tiles[i]::set_Enabled(true);
+	            i = i + 1;
+	         }
+	         Speler s = this::spel::GetHuidigeSpeler();
+	         this::label::set_Text(s::GetNaam() + " is aan zet!");
+	      }
+	      else if (message is Bord;) then
+	      {
+	         Bord b = (Bord)message;
+	         Int32 i = 0;
+	         while (i < 9;)
+	         {
+	            this::tiles[i]::set_Text(b::GetVakje(i)::ToString());
+	            i = i + 1;
+	         }
+	         Speler s = this::spel::GetHuidigeSpeler();
+	         this::label::set_Text(s::GetNaam() + " is aan zet!");
+	      }
+	      else
+	      {
+	         Int32 i = (Int32)message;
+	         if (i == -1;) then
+	         {
+	            this::label::set_Text("Gelijkspel!");
+	         }
+	         else
+	         {
+	            Speler s = this::spel::GetSpelers()[i];
+	            this::label::set_Text(s::GetNaam() + " heeft gewonnen!");
+	         } fi;
+	         i = 0;
+	         while (i < 9;)
+	         {
+	            this::tiles[i]::set_Enabled(false);
+	            i = i + 1;
+	         }
+	      } fi fi;
+	   }
+	   
+	   private void button_Clicked(Object sender, EventArgs e)
+	   {
+	      Speler s1, s2;
+	      s1 = if (this::s1radio1::get_Checked();) then
+	         (Speler)new MensSpeler("Speler 1", Mark::XX)
+	      else if (this::s1radio2::get_Checked();) then
+	         (Speler)new ComputerSpeler("Speler 1", Mark::XX, new DommeStrategie())
+	      else
+	         (Speler)new ComputerSpeler("Speler 1", Mark::XX, new BesteStrategie())
+	      fi fi;
+	      
+	      s2 = if (this::s2radio1::get_Checked();) then
+	         (Speler)new MensSpeler("Speler 2", Mark::OO)
+	      else if (this::s2radio2::get_Checked();) then
+	         (Speler)new ComputerSpeler("Speler 2", Mark::OO, new DommeStrategie())
+	      else
+	         (Speler)new ComputerSpeler("Speler 2", Mark::OO, new BesteStrategie())
+	      fi fi;
+	      
+         this::spel = new Spel(s1, s2);
+         this::spel::AddObserver(this);
+         Thread t = new Thread(new ThreadStart(this::spel::Play));
+         t::set_IsBackground(true);
+         t::Start();
+	   }
+	   
+	   private void move_Clicked(Object sender, EventArgs e)
+	   {
+	      if (this::spel::GetHuidigeSpeler() is MensSpeler;) then
+	      {
+	      	Button b = (Button)sender;
+            Int32 move = Int32::Parse(b::get_Name());
+            MensSpeler s = (MensSpeler)this::spel::GetHuidigeSpeler();
+            Monitor::Enter(s);
+            s::SetTempMove(move);
+            Monitor::Pulse(s);
+            Monitor::Exit(s);
+	      } fi;
+
+	   }
+	}
+}
+\end{lstlisting}
+
+\subsubsection{Bord.vnvd}
+De broncode van \textit{Bord.vnvd} is als volgt:
+
+% Bord.vnvd, r136, floris, 2009-06-27 21:29:33 +0200
+\begin{lstlisting}
+import System;
+
+namespace BoterKaasEieren
+{
+   class public Bord
+   {
+      public static initonly Int32 DIM;
+      
+      private Mark[] bord;
+      
+      static
+      {
+         Bord::DIM = 3;
+      }
+      
+      public Bord()
+      {
+         this::bord = new Mark[Bord::DIM * Bord::DIM];
+         this::Reset();
+      }
+      
+      public Bord DeepCopy()
+      {
+         Bord copy;
+         copy = new Bord();
+         Int32 i;
+         i = 0;
+         while (i < Bord::DIM * Bord::DIM;)
+         {
+            copy::SetVakje(i, this::GetVakje(i));
+         }
+         copy;
+      }
+      
+      public Int32 Index(Int32 rij, Int32 kol)
+      {
+         Bord::DIM * rij + kol;
+      }
+      
+      public void Reset()
+      {
+         Int32 i;
+         i = 0;
+         while (i < Bord::DIM * Bord::DIM;)
+         {
+            this::SetVakje(i, Mark::EMPTY);
+            i = i + 1;
+         }
+      }
+      
+      public void SetVakje(Int32 rij, Int32 kol, Mark m)
+      {
+         this::SetVakje(this::Index(rij, kol), m);
+      }
+      
+      public void SetVakje(Int32 i, Mark m)
+      {
+         this::bord[i] = m;
+      }
+      
+      public Mark GetVakje(Int32 rij, Int32 kol)
+      {
+         this::GetVakje(this::Index(rij, kol));
+      }
+      
+      public Mark GetVakje(Int32 i)
+      {
+         this::bord[i];
+      }
+      
+      public Boolean HeeftRij(Mark mark)
+      {
+         Boolean found = false;
+       	Int32 i = 0;
+       	Int32 j;
+       	while (i < Bord::DIM && !found;)
+       	{
+       		j = 0;
+       		found = true;
+       		while (j < Bord::DIM && found;)
+       		{
+       			found = this::GetVakje(i, j) == mark;
+       			j = j + 1;
+       		}
+       		i = i + 1;
+       	}
+       	found;
+      }
+      
+      public Boolean HeeftKolom(Mark mark)
+      {
+         Boolean found = false;
+       	Int32 i = 0;
+       	Int32 j;
+       	while (i < Bord::DIM && !found;)
+       	{
+       		j = 0;
+       		found = true;
+       		while (j < Bord::DIM && found;)
+       		{
+       			found = this::GetVakje(j, i) == mark;
+       			j = j + 1;
+       		}
+       		i = i + 1;
+       	}
+       	found;
+      }
+      
+      public Boolean HeeftDiagonaal(Mark mark)
+      {
+       	Boolean d1, d2;
+       	Int32 i = 0;
+       	d1 = d2 = true;
+       	while (i < Bord::DIM && (d1 || d2);)
+       	{
+       		d1 = d1 && this::GetVakje(i, i) == mark;
+       		d2 = d2 && this::GetVakje(i, Bord::DIM - i - 1) == mark;
+       		i = i + 1;
+       	}
+       	d1 || d2;
+      }
+      
+      public Boolean HeeftWinnaar()
+      {
+         this::HeeftGewonnen(Mark::XX) || this::HeeftGewonnen(Mark::OO);
+      }
+      
+      public Boolean GameOver()
+      {
+         this::HeeftWinnaar() || this::IsVol();
+      }
+      
+      public Boolean IsVol()
+      {
+         Int32 i;
+         i = 0;
+         Boolean vol;
+         vol = true;
+         while (i < Bord::DIM * Bord::DIM && vol;)
+         {
+            vol = this::GetVakje(i) != Mark::EMPTY;
+            i = i + 1;
+         }
+         vol;
+      }
+      
+      public Boolean HeeftGewonnen(Mark m)
+      {
+         this::HeeftRij(m) || this::HeeftKolom(m) || this::HeeftDiagonaal(m);
+      }
+      
+      public Boolean IsVakje(Int32 rij, Int32 kolom)
+      {
+         this::IsVakje(this::Index(rij, kolom));
+      }
+      
+      public Boolean IsVakje(Int32 i)
+      {
+         i < Bord::DIM * Bord::DIM && i >= 0;
+      }
+      
+      public Boolean IsLeegVakje(Int32 rij, Int32 kolom)
+      {
+         this::IsLeegVakje(this::Index(rij, kolom));
+      }
+      
+      public Boolean IsLeegVakje(Int32 i)
+      {
+         this::bord[i] == Mark::EMPTY;
+      }
+      
+      public Boolean IsCorrecteZet(Int32 i)
+      {
+         this::IsVakje(i) && this::IsLeegVakje(i);
+      }
+      
+      public Boolean IsCorrecteZet(Int32 rij, Int32 kol)
+      {
+         this::IsCorrecteZet(this::Index(rij, kol));
+      }
+   }
+}
+\end{lstlisting}
+
+\subsubsection{ComputerSpeler.vnvd}
+De broncode van \textit{ComputerSpeler.vnvd} is als volgt:
+
+% ComputerSpeler.vnvd, r136, floris, 2009-06-27 21:29:33 +0200
+\begin{lstlisting}
+import System;
+import System.Threading;
+
+namespace BoterKaasEieren
+{
+   class public ComputerSpeler extends Speler
+   {
+      private IStrategie strategie;
+      
+      public ComputerSpeler(String naam, Mark mark, IStrategie strategie) : base(naam, mark)
+      {
+         this::strategie = strategie;
+      }
+      
+      public override Int32 BepaalZet(Bord bord)
+      {
+         this::strategie::BerekenZet(bord, this::GetMark());
+      }
+      
+      public IStrategie GetStrategie()
+      {
+         this::strategie;
+      }
+      
+      public void SetStrategie(IStrategie strategie)
+      {
+         this::strategie = strategie;
+      }
+   }
+}
+\end{lstlisting}
+
+\subsubsection{DommeStrategie.vnvd}
+De broncode van \textit{DommeStrategie.vnvd} is als volgt:
+
+% DommeStrategie.vnvd, r136, floris, 2009-06-27 21:29:33 +0200
+\begin{lstlisting}
+import System;
+import System.Collections;
+import System.Drawing;
+import System.Timers;
+import System.Windows.Forms;
+import System.ComponentModel;
+
+namespace BoterKaasEieren
+{
+	class public DommeStrategie implements IStrategie
+	{
+	   private Random random;
+	   
+	   public DommeStrategie()
+	   {
+	      this::random = new Random();
+	   }
+	   
+	   public Int32 BerekenZet(Bord bord, Mark mark)
+	   {
+	      ArrayList zetten = new ArrayList();
+	      Int32 i = 0;
+	      while (i < Bord::DIM * Bord::DIM;)
+	      {
+	         if (bord::IsLeegVakje(i);) then
+	         {
+	            zetten::Add((Object)i);
+	         } fi;
+	         i = i + 1;
+	      }
+	      (Int32)zetten::get_Item(this::random::Next(0, zetten::get_Count()));
+	   }
+	}
+
+}
+\end{lstlisting}
+
+\subsubsection{IMessageListener.vnvd}
+De broncode van \textit{IMessageListener.vnvd} is als volgt:
+
+% IMessageListener.vnvd, r130, floris, 2009-06-27 09:54:31 +0200
+\begin{lstlisting}
+import System;
+import System.Collections;
+import System.Drawing;
+import System.Timers;
+import System.Windows.Forms;
+import System.ComponentModel;
+
+namespace BoterKaasEieren
+{
+	interface public IMessageListener extends ISynchronizeInvoke
+	{
+	   void MessageReceived(Object message);
+	}
+
+}
+\end{lstlisting}
+
+\subsubsection{IStrategie.vnvd}
+De broncode van \textit{IStrategie.vnvd} is als volgt:
+
+% IStrategie.vnvd, r136, floris, 2009-06-27 21:29:33 +0200
+\begin{lstlisting}
+import System;
+import System.Collections;
+import System.Drawing;
+import System.Timers;
+import System.Windows.Forms;
+import System.ComponentModel;
+
+namespace BoterKaasEieren
+{
+	interface public IStrategie
+	{
+	   Int32 BerekenZet(Bord bord, Mark mark);
+	}
+
+}
+\end{lstlisting}
+
+\subsubsection{Mark.vnvd}
+De broncode van \textit{Mark.vnvd} is als volgt:
+
+% Mark.vnvd, r130, floris, 2009-06-27 09:54:31 +0200
+\begin{lstlisting}
+import System;
+
+namespace BoterKaasEieren
+{
+   class public Mark
+   {
+      public static initonly Mark XX, OO, EMPTY;
+
+      private String sign;
+      
+      private Mark(String sign)
+      {
+         this::sign = sign;
+      }
+      
+      public Mark Other()
+      {
+         if (this == Mark::XX;) then Mark::OO else Mark::XX fi;
+      }
+      
+      public override String ToString()
+      {
+         this::sign;
+      }
+      
+      static
+      {
+         Mark::XX = new Mark("X");
+         Mark::OO = new Mark("O");
+         Mark::EMPTY = new Mark(" ");
+      }
+   }
+}
+\end{lstlisting}
+
+\subsubsection{MensSpeler.vnvd}
+De broncode van \textit{MensSpeler.vnvd} is als volgt:
+
+% MensSpeler.vnvd, r130, floris, 2009-06-27 09:54:31 +0200
+\begin{lstlisting}
+import System;
+import System.Threading;
+
+namespace BoterKaasEieren
+{
+   class public MensSpeler extends Speler
+   {
+      private Int32 tempMove;
+      
+      public MensSpeler(String naam, Mark mark) : base(naam, mark)
+      {
+         this::tempMove = -1;
+      }
+      
+      public override Int32 BepaalZet(Bord bord)
+      {
+         Monitor::Enter(this);
+         while (!bord::IsCorrecteZet(this::tempMove);)
+         {
+            Monitor::Wait(this);
+         }
+         
+         Monitor::Exit(this);
+         Int32 ret = this::tempMove;
+         this::tempMove = -1;
+         ret;
+      }
+      
+      public Int32 GetTempMove()
+      {
+         this::tempMove;
+      }
+      
+      public void SetTempMove(Int32 tempMove)
+      {
+         this::tempMove = tempMove;
+      }
+   }
+}
+\end{lstlisting}
+
+\subsubsection{Speler.vnvd}
+De broncode van \textit{Speler.vnvd} is als volgt:
+
+% Speler.vnvd, r130, floris, 2009-06-27 09:54:31 +0200
+\begin{lstlisting}
+import System;
+
+namespace BoterKaasEieren
+{
+   class public abstract Speler
+   {
+      private String naam;
+      private Mark mark;
+      
+      protected Speler(String naam, Mark mark)
+      {
+         this::naam = naam;
+         this::mark = mark;
+      }
+      
+      public void DoeZet(Bord bord)
+      {
+         Int32 i = this::BepaalZet(bord);
+         bord::SetVakje(i, this::mark);
+      }
+      
+      public String GetNaam()
+      {
+         this::naam;
+      }
+      
+      public Mark GetMark()
+      {
+         this::mark;
+      }
+      
+      public abstract Int32 BepaalZet(Bord bord);
+   }
+}
+\end{lstlisting}
+
+\subsubsection{Spel.vnvd}
+De broncode van \textit{Spel.vnvd} is als volgt:
+
+% Spel.vnvd, r130, floris, 2009-06-27 09:54:31 +0200
+\begin{lstlisting}
+import System;
+import System.Collections;
+import System.Threading;
+
+namespace BoterKaasEieren
+{
+   class public Spel
+   {
+      public static initonly Int32 AANTAL_SPELERS;
+      
+      private Speler[] spelers;
+      private Int32 huidig;
+      private Bord bord;
+      private ArrayList listeners;
+      
+      public Spel(Speler s1, Speler s2)
+      {
+         this::spelers = new Speler[] { s1, s2 };
+         this::listeners = new ArrayList();
+         this::bord = new Bord();
+      }
+      
+      public Bord GetBord()
+      {
+         this::bord;
+      }
+      
+      public Int32 GetHuidig()
+      {
+         this::huidig;
+      }
+      
+      public Speler GetHuidigeSpeler()
+      {
+         this::spelers[this::huidig];
+      }
+      
+      public Speler[] GetSpelers()
+      {
+         this::spelers;
+      }
+      
+      public void Reset()
+      {
+         this::bord::Reset();
+         this::huidig = 0;
+      }
+      
+      public void Play()
+      {
+         this::Update(null);
+         while (!this::bord::GameOver();)
+         {
+            this::spelers[this::huidig]::DoeZet(this::bord);
+            this::huidig = (this::huidig + 1) % Spel::AANTAL_SPELERS;
+            
+            this::Update(this::bord);
+         }
+         this::Update(if (this::bord::HeeftWinnaar();) then (Object)((this::huidig + 1) % Spel::AANTAL_SPELERS) else (Object)-1 fi);
+      }
+      
+      public void AddObserver(IMessageListener l)
+      {
+         this::listeners::Add(l);
+      }
+      
+      public void RemoveObserver(IMessageListener l)
+      {
+         this::listeners::Remove(l);
+      }
+      
+      public void Update(Object msg)
+      {
+         for (IMessageListener l in this::listeners)
+         {
+            if (l::get_InvokeRequired();) then
+            {
+   	         l::Invoke(new ParameterizedThreadStart(l::MessageReceived), new Object[] { msg });
+   	      }
+   	      else
+   	      {
+               l::MessageReceived(msg);
+            }
+            fi;
+         }
+      }
+      
+      static
+      {
+         Spel::AANTAL_SPELERS = 2;
+      }
+   }
+}
+\end{lstlisting}
+
+\subsection{Assembly}
+Tijdens de compilatie produceert de VNVD compiler de volgende assembly:
+
+\begin{lstlisting}
+.assembly extern mscorlib
+{
+  .ver 2:0:0:0
+  .publickeytoken = (B7 7A 5C 56 19 34 E0 89 ) // .z\V.4..
+}
+.assembly extern System
+{
+  .ver 2:0:0:0
+  .publickeytoken = (B7 7A 5C 56 19 34 E0 89 ) // .z\V.4..
+}
+.assembly extern System.Windows.Forms
+{
+  .ver 2:0:0:0
+  .publickeytoken = (B7 7A 5C 56 19 34 E0 89 ) // .z\V.4..
+}
+.assembly extern System.Drawing
+{
+  .ver 2:0:0:0
+  .publickeytoken = (B0 3F 5F 7F 11 D5 0A 3A ) // .?_....:
+}
+.assembly 'BKE'
+{
+  .hash algorithm 0x00008004
+  .ver  0:0:0:0
+}
+.module BKE // GUID = {78DF7BDF-F79A-430E-ABD2-45D230FAC7DE}
+
+
+.namespace BoterKaasEieren
+{
+  .class public auto ansi Bord
+  	extends [mscorlib]System.Object
+  {
+    .field  public static  initonly  int32 DIM
+    .field  private  class BoterKaasEieren.Mark[] bord
+
+    // method line 1
+    .method public static  specialname  rtspecialname 
+           default void '.cctor' ()  cil managed 
+    {
+        // Method begins at RVA 0x20ec
+	// Code size 12 (0xc)
+	.maxstack 1
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldc.i4 3
+	IL_0006:  stsfld int32 BoterKaasEieren.Bord::DIM
+	IL_000b:  ret 
+    } // end of method Bord::.cctor
+
+    // method line 2
+    .method public hidebysig  specialname  rtspecialname 
+           instance default void '.ctor' ()  cil managed 
+    {
+        // Method begins at RVA 0x2104
+	// Code size 35 (0x23)
+	.maxstack 6
+	.locals init (
+		object	V_0)
+	IL_0000:  ldarg.0 
+	IL_0001:  call instance void object::'.ctor'()
+	IL_0006:  ldarg.0 
+	IL_0007:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_000c:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_0011:  mul 
+	IL_0012:  newarr BoterKaasEieren.Mark
+	IL_0017:  stfld class BoterKaasEieren.Mark[] BoterKaasEieren.Bord::bord
+	IL_001c:  ldarg.0 
+	IL_001d:  call instance void class BoterKaasEieren.Bord::Reset()
+	IL_0022:  ret 
+    } // end of method Bord::.ctor
+
+    // method line 3
+    .method public hidebysig 
+           instance default class BoterKaasEieren.Bord DeepCopy ()  cil managed 
+    {
+        // Method begins at RVA 0x2134
+	// Code size 53 (0x35)
+	.maxstack 6
+	.locals init (
+		object	V_0,
+		class BoterKaasEieren.Bord	V_1,
+		int32	V_2)
+	IL_0000:  nop 
+	IL_0001:  newobj instance void class BoterKaasEieren.Bord::'.ctor'()
+	IL_0006:  stloc.1 
+	IL_0007:  ldc.i4 0
+	IL_000c:  stloc.2 
+	IL_000d:  ldloc.2 
+	IL_000e:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_0013:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_0018:  mul 
+	IL_0019:  clt 
+	IL_001b:  brfalse IL_0033
+
+	IL_0020:  ldloc.1 
+	IL_0021:  ldloc.2 
+	IL_0022:  ldarg.0 
+	IL_0023:  ldloc.2 
+	IL_0024:  call instance class BoterKaasEieren.Mark class BoterKaasEieren.Bord::GetVakje(int32)
+	IL_0029:  call instance void class BoterKaasEieren.Bord::SetVakje(int32, class BoterKaasEieren.Mark)
+	IL_002e:  br IL_000d
+
+	IL_0033:  ldloc.1 
+	IL_0034:  ret 
+    } // end of method Bord::DeepCopy
+
+    // method line 4
+    .method public hidebysig 
+           instance default int32 Index (int32 rij, int32 kol)  cil managed 
+    {
+        // Method begins at RVA 0x2178
+	// Code size 17 (0x11)
+	.maxstack 3
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_0006:  ldarg 1
+
+	IL_000a:  mul 
+	IL_000b:  ldarg 2
+
+	IL_000f:  add 
+	IL_0010:  ret 
+    } // end of method Bord::Index
+
+    // method line 5
+    .method public hidebysig 
+           instance default void Reset ()  cil managed 
+    {
+        // Method begins at RVA 0x2198
+	// Code size 52 (0x34)
+	.maxstack 5
+	.locals init (
+		object	V_0,
+		int32	V_1)
+	IL_0000:  nop 
+	IL_0001:  ldc.i4 0
+	IL_0006:  stloc.1 
+	IL_0007:  ldloc.1 
+	IL_0008:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_000d:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_0012:  mul 
+	IL_0013:  clt 
+	IL_0015:  brfalse IL_0033
+
+	IL_001a:  ldarg.0 
+	IL_001b:  ldloc.1 
+	IL_001c:  ldsfld class BoterKaasEieren.Mark BoterKaasEieren.Mark::EMPTY
+	IL_0021:  call instance void class BoterKaasEieren.Bord::SetVakje(int32, class BoterKaasEieren.Mark)
+	IL_0026:  ldloc.1 
+	IL_0027:  ldc.i4 1
+	IL_002c:  add 
+	IL_002d:  stloc.1 
+	IL_002e:  br IL_0007
+
+	IL_0033:  ret 
+    } // end of method Bord::Reset
+
+    // method line 6
+    .method public hidebysig 
+           instance default void SetVakje (int32 rij, int32 kol, class BoterKaasEieren.Mark m)  cil managed 
+    {
+        // Method begins at RVA 0x21d8
+	// Code size 26 (0x1a)
+	.maxstack 6
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldarg.0 
+	IL_0003:  ldarg 1
+
+	IL_0007:  ldarg 2
+
+	IL_000b:  call instance int32 class BoterKaasEieren.Bord::Index(int32, int32)
+	IL_0010:  ldarg 3
+
+	IL_0014:  call instance void class BoterKaasEieren.Bord::SetVakje(int32, class BoterKaasEieren.Mark)
+	IL_0019:  ret 
+    } // end of method Bord::SetVakje
+
+    // method line 7
+    .method public hidebysig 
+           instance default void SetVakje (int32 i, class BoterKaasEieren.Mark m)  cil managed 
+    {
+        // Method begins at RVA 0x2200
+	// Code size 21 (0x15)
+	.maxstack 3
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldfld class BoterKaasEieren.Mark[] BoterKaasEieren.Bord::bord
+	IL_0007:  ldarg 1
+
+	IL_000b:  ldarg 2
+
+	IL_000f:  stelem.any BoterKaasEieren.Mark
+	IL_0014:  ret 
+    } // end of method Bord::SetVakje
+
+    // method line 8
+    .method public hidebysig 
+           instance default class BoterKaasEieren.Mark GetVakje (int32 rij, int32 kol)  cil managed 
+    {
+        // Method begins at RVA 0x2224
+	// Code size 22 (0x16)
+	.maxstack 5
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldarg.0 
+	IL_0003:  ldarg 1
+
+	IL_0007:  ldarg 2
+
+	IL_000b:  call instance int32 class BoterKaasEieren.Bord::Index(int32, int32)
+	IL_0010:  call instance class BoterKaasEieren.Mark class BoterKaasEieren.Bord::GetVakje(int32)
+	IL_0015:  ret 
+    } // end of method Bord::GetVakje
+
+    // method line 9
+    .method public hidebysig 
+           instance default class BoterKaasEieren.Mark GetVakje (int32 i)  cil managed 
+    {
+        // Method begins at RVA 0x2248
+	// Code size 17 (0x11)
+	.maxstack 3
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldfld class BoterKaasEieren.Mark[] BoterKaasEieren.Bord::bord
+	IL_0007:  ldarg 1
+
+	IL_000b:  ldelem.any BoterKaasEieren.Mark
+	IL_0010:  ret 
+    } // end of method Bord::GetVakje
+
+    // method line 10
+    .method public hidebysig 
+           instance default bool HeeftRij (class BoterKaasEieren.Mark mark)  cil managed 
+    {
+        // Method begins at RVA 0x2268
+	// Code size 113 (0x71)
+	.maxstack 7
+	.locals init (
+		object	V_0,
+		bool	V_1,
+		int32	V_2,
+		int32	V_3)
+	IL_0000:  nop 
+	IL_0001:  ldc.i4.0 
+	IL_0002:  stloc.1 
+	IL_0003:  ldc.i4 0
+	IL_0008:  stloc.2 
+	IL_0009:  ldloc.2 
+	IL_000a:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_000f:  clt 
+	IL_0011:  brfalse IL_001f
+
+	IL_0016:  ldloc.1 
+	IL_0017:  ldc.i4.0 
+	IL_0018:  ceq 
+	IL_001a:  br IL_0020
+
+	IL_001f:  ldc.i4.0 
+	IL_0020:  brfalse IL_006f
+
+	IL_0025:  ldc.i4 0
+	IL_002a:  stloc.3 
+	IL_002b:  ldc.i4.1 
+	IL_002c:  stloc.1 
+	IL_002d:  ldloc.3 
+	IL_002e:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_0033:  clt 
+	IL_0035:  brfalse IL_0040
+
+	IL_003a:  ldloc.1 
+	IL_003b:  br IL_0041
+
+	IL_0040:  ldc.i4.0 
+	IL_0041:  brfalse IL_0062
+
+	IL_0046:  ldarg.0 
+	IL_0047:  ldloc.2 
+	IL_0048:  ldloc.3 
+	IL_0049:  call instance class BoterKaasEieren.Mark class BoterKaasEieren.Bord::GetVakje(int32, int32)
+	IL_004e:  ldarg 1
+
+	IL_0052:  ceq 
+	IL_0054:  stloc.1 
+	IL_0055:  ldloc.3 
+	IL_0056:  ldc.i4 1
+	IL_005b:  add 
+	IL_005c:  stloc.3 
+	IL_005d:  br IL_002d
+
+	IL_0062:  ldloc.2 
+	IL_0063:  ldc.i4 1
+	IL_0068:  add 
+	IL_0069:  stloc.2 
+	IL_006a:  br IL_0009
+
+	IL_006f:  ldloc.1 
+	IL_0070:  ret 
+    } // end of method Bord::HeeftRij
+
+    // method line 11
+    .method public hidebysig 
+           instance default bool HeeftKolom (class BoterKaasEieren.Mark mark)  cil managed 
+    {
+        // Method begins at RVA 0x22e8
+	// Code size 113 (0x71)
+	.maxstack 7
+	.locals init (
+		object	V_0,
+		bool	V_1,
+		int32	V_2,
+		int32	V_3)
+	IL_0000:  nop 
+	IL_0001:  ldc.i4.0 
+	IL_0002:  stloc.1 
+	IL_0003:  ldc.i4 0
+	IL_0008:  stloc.2 
+	IL_0009:  ldloc.2 
+	IL_000a:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_000f:  clt 
+	IL_0011:  brfalse IL_001f
+
+	IL_0016:  ldloc.1 
+	IL_0017:  ldc.i4.0 
+	IL_0018:  ceq 
+	IL_001a:  br IL_0020
+
+	IL_001f:  ldc.i4.0 
+	IL_0020:  brfalse IL_006f
+
+	IL_0025:  ldc.i4 0
+	IL_002a:  stloc.3 
+	IL_002b:  ldc.i4.1 
+	IL_002c:  stloc.1 
+	IL_002d:  ldloc.3 
+	IL_002e:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_0033:  clt 
+	IL_0035:  brfalse IL_0040
+
+	IL_003a:  ldloc.1 
+	IL_003b:  br IL_0041
+
+	IL_0040:  ldc.i4.0 
+	IL_0041:  brfalse IL_0062
+
+	IL_0046:  ldarg.0 
+	IL_0047:  ldloc.3 
+	IL_0048:  ldloc.2 
+	IL_0049:  call instance class BoterKaasEieren.Mark class BoterKaasEieren.Bord::GetVakje(int32, int32)
+	IL_004e:  ldarg 1
+
+	IL_0052:  ceq 
+	IL_0054:  stloc.1 
+	IL_0055:  ldloc.3 
+	IL_0056:  ldc.i4 1
+	IL_005b:  add 
+	IL_005c:  stloc.3 
+	IL_005d:  br IL_002d
+
+	IL_0062:  ldloc.2 
+	IL_0063:  ldc.i4 1
+	IL_0068:  add 
+	IL_0069:  stloc.2 
+	IL_006a:  br IL_0009
+
+	IL_006f:  ldloc.1 
+	IL_0070:  ret 
+    } // end of method Bord::HeeftKolom
+
+    // method line 12
+    .method public hidebysig 
+           instance default bool HeeftDiagonaal (class BoterKaasEieren.Mark mark)  cil managed 
+    {
+        // Method begins at RVA 0x2368
+	// Code size 141 (0x8d)
+	.maxstack 11
+	.locals init (
+		object	V_0,
+		bool	V_1,
+		bool	V_2,
+		int32	V_3)
+	IL_0000:  nop 
+	IL_0001:  ldc.i4 0
+	IL_0006:  stloc.3 
+	IL_0007:  ldc.i4.1 
+	IL_0008:  stloc.2 
+	IL_0009:  ldloc.2 
+	IL_000a:  stloc.1 
+	IL_000b:  ldloc.3 
+	IL_000c:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_0011:  clt 
+	IL_0013:  brfalse IL_002a
+
+	IL_0018:  ldloc.1 
+	IL_0019:  brtrue IL_0024
+
+	IL_001e:  ldloc.2 
+	IL_001f:  br IL_0025
+
+	IL_0024:  ldc.i4.1 
+	IL_0025:  br IL_002b
+
+	IL_002a:  ldc.i4.0 
+	IL_002b:  brfalse IL_007f
+
+	IL_0030:  ldloc.1 
+	IL_0031:  brfalse IL_0049
+
+	IL_0036:  ldarg.0 
+	IL_0037:  ldloc.3 
+	IL_0038:  ldloc.3 
+	IL_0039:  call instance class BoterKaasEieren.Mark class BoterKaasEieren.Bord::GetVakje(int32, int32)
+	IL_003e:  ldarg 1
+
+	IL_0042:  ceq 
+	IL_0044:  br IL_004a
+
+	IL_0049:  ldc.i4.0 
+	IL_004a:  stloc.1 
+	IL_004b:  ldloc.2 
+	IL_004c:  brfalse IL_0070
+
+	IL_0051:  ldarg.0 
+	IL_0052:  ldloc.3 
+	IL_0053:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_0058:  ldloc.3 
+	IL_0059:  sub 
+	IL_005a:  ldc.i4 1
+	IL_005f:  sub 
+	IL_0060:  call instance class BoterKaasEieren.Mark class BoterKaasEieren.Bord::GetVakje(int32, int32)
+	IL_0065:  ldarg 1
+
+	IL_0069:  ceq 
+	IL_006b:  br IL_0071
+
+	IL_0070:  ldc.i4.0 
+	IL_0071:  stloc.2 
+	IL_0072:  ldloc.3 
+	IL_0073:  ldc.i4 1
+	IL_0078:  add 
+	IL_0079:  stloc.3 
+	IL_007a:  br IL_000b
+
+	IL_007f:  ldloc.1 
+	IL_0080:  brtrue IL_008b
+
+	IL_0085:  ldloc.2 
+	IL_0086:  br IL_008c
+
+	IL_008b:  ldc.i4.1 
+	IL_008c:  ret 
+    } // end of method Bord::HeeftDiagonaal
+
+    // method line 13
+    .method public hidebysig 
+           instance default bool HeeftWinnaar ()  cil managed 
+    {
+        // Method begins at RVA 0x2404
+	// Code size 35 (0x23)
+	.maxstack 6
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldsfld class BoterKaasEieren.Mark BoterKaasEieren.Mark::XX
+	IL_0007:  call instance bool class BoterKaasEieren.Bord::HeeftGewonnen(class BoterKaasEieren.Mark)
+	IL_000c:  brtrue IL_0021
+
+	IL_0011:  ldarg.0 
+	IL_0012:  ldsfld class BoterKaasEieren.Mark BoterKaasEieren.Mark::OO
+	IL_0017:  call instance bool class BoterKaasEieren.Bord::HeeftGewonnen(class BoterKaasEieren.Mark)
+	IL_001c:  br IL_0022
+
+	IL_0021:  ldc.i4.1 
+	IL_0022:  ret 
+    } // end of method Bord::HeeftWinnaar
+
+    // method line 14
+    .method public hidebysig 
+           instance default bool GameOver ()  cil managed 
+    {
+        // Method begins at RVA 0x2434
+	// Code size 25 (0x19)
+	.maxstack 6
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  call instance bool class BoterKaasEieren.Bord::HeeftWinnaar()
+	IL_0007:  brtrue IL_0017
+
+	IL_000c:  ldarg.0 
+	IL_000d:  call instance bool class BoterKaasEieren.Bord::IsVol()
+	IL_0012:  br IL_0018
+
+	IL_0017:  ldc.i4.1 
+	IL_0018:  ret 
+    } // end of method Bord::GameOver
+
+    // method line 15
+    .method public hidebysig 
+           instance default bool IsVol ()  cil managed 
+    {
+        // Method begins at RVA 0x245c
+	// Code size 73 (0x49)
+	.maxstack 6
+	.locals init (
+		object	V_0,
+		int32	V_1,
+		bool	V_2)
+	IL_0000:  nop 
+	IL_0001:  ldc.i4 0
+	IL_0006:  stloc.1 
+	IL_0007:  ldc.i4.1 
+	IL_0008:  stloc.2 
+	IL_0009:  ldloc.1 
+	IL_000a:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_000f:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_0014:  mul 
+	IL_0015:  clt 
+	IL_0017:  brfalse IL_0022
+
+	IL_001c:  ldloc.2 
+	IL_001d:  br IL_0023
+
+	IL_0022:  ldc.i4.0 
+	IL_0023:  brfalse IL_0047
+
+	IL_0028:  ldarg.0 
+	IL_0029:  ldloc.1 
+	IL_002a:  call instance class BoterKaasEieren.Mark class BoterKaasEieren.Bord::GetVakje(int32)
+	IL_002f:  ldsfld class BoterKaasEieren.Mark BoterKaasEieren.Mark::EMPTY
+	IL_0034:  ceq 
+	IL_0036:  ldc.i4.0 
+	IL_0037:  ceq 
+	IL_0039:  stloc.2 
+	IL_003a:  ldloc.1 
+	IL_003b:  ldc.i4 1
+	IL_0040:  add 
+	IL_0041:  stloc.1 
+	IL_0042:  br IL_0009
+
+	IL_0047:  ldloc.2 
+	IL_0048:  ret 
+    } // end of method Bord::IsVol
+
+    // method line 16
+    .method public hidebysig 
+           instance default bool HeeftGewonnen (class BoterKaasEieren.Mark m)  cil managed 
+    {
+        // Method begins at RVA 0x24b4
+	// Code size 54 (0x36)
+	.maxstack 9
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldarg 1
+
+	IL_0006:  call instance bool class BoterKaasEieren.Bord::HeeftRij(class BoterKaasEieren.Mark)
+	IL_000b:  brtrue IL_001f
+
+	IL_0010:  ldarg.0 
+	IL_0011:  ldarg 1
+
+	IL_0015:  call instance bool class BoterKaasEieren.Bord::HeeftKolom(class BoterKaasEieren.Mark)
+	IL_001a:  br IL_0020
+
+	IL_001f:  ldc.i4.1 
+	IL_0020:  brtrue IL_0034
+
+	IL_0025:  ldarg.0 
+	IL_0026:  ldarg 1
+
+	IL_002a:  call instance bool class BoterKaasEieren.Bord::HeeftDiagonaal(class BoterKaasEieren.Mark)
+	IL_002f:  br IL_0035
+
+	IL_0034:  ldc.i4.1 
+	IL_0035:  ret 
+    } // end of method Bord::HeeftGewonnen
+
+    // method line 17
+    .method public hidebysig 
+           instance default bool IsVakje (int32 rij, int32 kolom)  cil managed 
+    {
+        // Method begins at RVA 0x24f8
+	// Code size 22 (0x16)
+	.maxstack 5
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldarg.0 
+	IL_0003:  ldarg 1
+
+	IL_0007:  ldarg 2
+
+	IL_000b:  call instance int32 class BoterKaasEieren.Bord::Index(int32, int32)
+	IL_0010:  call instance bool class BoterKaasEieren.Bord::IsVakje(int32)
+	IL_0015:  ret 
+    } // end of method Bord::IsVakje
+
+    // method line 18
+    .method public hidebysig 
+           instance default bool IsVakje (int32 i)  cil managed 
+    {
+        // Method begins at RVA 0x251c
+	// Code size 44 (0x2c)
+	.maxstack 4
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg 1
+
+	IL_0005:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_000a:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_000f:  mul 
+	IL_0010:  clt 
+	IL_0012:  brfalse IL_002a
+
+	IL_0017:  ldarg 1
+
+	IL_001b:  ldc.i4 0
+	IL_0020:  clt 
+	IL_0022:  ldc.i4.0 
+	IL_0023:  ceq 
+	IL_0025:  br IL_002b
+
+	IL_002a:  ldc.i4.0 
+	IL_002b:  ret 
+    } // end of method Bord::IsVakje
+
+    // method line 19
+    .method public hidebysig 
+           instance default bool IsLeegVakje (int32 rij, int32 kolom)  cil managed 
+    {
+        // Method begins at RVA 0x2554
+	// Code size 22 (0x16)
+	.maxstack 5
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldarg.0 
+	IL_0003:  ldarg 1
+
+	IL_0007:  ldarg 2
+
+	IL_000b:  call instance int32 class BoterKaasEieren.Bord::Index(int32, int32)
+	IL_0010:  call instance bool class BoterKaasEieren.Bord::IsLeegVakje(int32)
+	IL_0015:  ret 
+    } // end of method Bord::IsLeegVakje
+
+    // method line 20
+    .method public hidebysig 
+           instance default bool IsLeegVakje (int32 i)  cil managed 
+    {
+        // Method begins at RVA 0x2578
+	// Code size 24 (0x18)
+	.maxstack 3
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldfld class BoterKaasEieren.Mark[] BoterKaasEieren.Bord::bord
+	IL_0007:  ldarg 1
+
+	IL_000b:  ldelem.any BoterKaasEieren.Mark
+	IL_0010:  ldsfld class BoterKaasEieren.Mark BoterKaasEieren.Mark::EMPTY
+	IL_0015:  ceq 
+	IL_0017:  ret 
+    } // end of method Bord::IsLeegVakje
+
+    // method line 21
+    .method public hidebysig 
+           instance default bool IsCorrecteZet (int32 i)  cil managed 
+    {
+        // Method begins at RVA 0x259c
+	// Code size 33 (0x21)
+	.maxstack 6
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldarg 1
+
+	IL_0006:  call instance bool class BoterKaasEieren.Bord::IsVakje(int32)
+	IL_000b:  brfalse IL_001f
+
+	IL_0010:  ldarg.0 
+	IL_0011:  ldarg 1
+
+	IL_0015:  call instance bool class BoterKaasEieren.Bord::IsLeegVakje(int32)
+	IL_001a:  br IL_0020
+
+	IL_001f:  ldc.i4.0 
+	IL_0020:  ret 
+    } // end of method Bord::IsCorrecteZet
+
+    // method line 22
+    .method public hidebysig 
+           instance default bool IsCorrecteZet (int32 rij, int32 kol)  cil managed 
+    {
+        // Method begins at RVA 0x25cc
+	// Code size 22 (0x16)
+	.maxstack 5
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldarg.0 
+	IL_0003:  ldarg 1
+
+	IL_0007:  ldarg 2
+
+	IL_000b:  call instance int32 class BoterKaasEieren.Bord::Index(int32, int32)
+	IL_0010:  call instance bool class BoterKaasEieren.Bord::IsCorrecteZet(int32)
+	IL_0015:  ret 
+    } // end of method Bord::IsCorrecteZet
+
+  } // end of class BoterKaasEieren.Bord
+}
+
+.namespace BoterKaasEieren
+{
+  .class public auto ansi Mark
+  	extends [mscorlib]System.Object
+  {
+    .field  public static  initonly  class BoterKaasEieren.Mark XX
+    .field  public static  initonly  class BoterKaasEieren.Mark OO
+    .field  public static  initonly  class BoterKaasEieren.Mark EMPTY
+    .field  private  string sign
+
+    // method line 23
+    .method private hidebysig  specialname  rtspecialname 
+           instance default void '.ctor' (string sign)  cil managed 
+    {
+        // Method begins at RVA 0x25f0
+	// Code size 17 (0x11)
+	.maxstack 4
+	.locals init (
+		object	V_0)
+	IL_0000:  ldarg.0 
+	IL_0001:  call instance void object::'.ctor'()
+	IL_0006:  ldarg.0 
+	IL_0007:  ldarg 1
+
+	IL_000b:  stfld string BoterKaasEieren.Mark::sign
+	IL_0010:  ret 
+    } // end of method Mark::.ctor
+
+    // method line 24
+    .method public static  specialname  rtspecialname 
+           default void '.cctor' ()  cil managed 
+    {
+        // Method begins at RVA 0x2610
+	// Code size 47 (0x2f)
+	.maxstack 2
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldstr "X"
+	IL_0006:  newobj instance void class BoterKaasEieren.Mark::'.ctor'(string)
+	IL_000b:  stsfld class BoterKaasEieren.Mark BoterKaasEieren.Mark::XX
+	IL_0010:  ldstr "O"
+	IL_0015:  newobj instance void class BoterKaasEieren.Mark::'.ctor'(string)
+	IL_001a:  stsfld class BoterKaasEieren.Mark BoterKaasEieren.Mark::OO
+	IL_001f:  ldstr " "
+	IL_0024:  newobj instance void class BoterKaasEieren.Mark::'.ctor'(string)
+	IL_0029:  stsfld class BoterKaasEieren.Mark BoterKaasEieren.Mark::EMPTY
+	IL_002e:  ret 
+    } // end of method Mark::.cctor
+
+    // method line 25
+    .method public hidebysig 
+           instance default class BoterKaasEieren.Mark Other ()  cil managed 
+    {
+        // Method begins at RVA 0x264c
+	// Code size 30 (0x1e)
+	.maxstack 3
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldsfld class BoterKaasEieren.Mark BoterKaasEieren.Mark::XX
+	IL_0007:  ceq 
+	IL_0009:  brfalse IL_0018
+
+	IL_000e:  ldsfld class BoterKaasEieren.Mark BoterKaasEieren.Mark::OO
+	IL_0013:  br IL_001d
+
+	IL_0018:  ldsfld class BoterKaasEieren.Mark BoterKaasEieren.Mark::XX
+	IL_001d:  ret 
+    } // end of method Mark::Other
+
+    // method line 26
+    .method public virtual  hidebysig 
+           instance default string ToString ()  cil managed 
+    {
+        // Method begins at RVA 0x2678
+	// Code size 8 (0x8)
+	.maxstack 2
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldfld string BoterKaasEieren.Mark::sign
+	IL_0007:  ret 
+    } // end of method Mark::ToString
+
+  } // end of class BoterKaasEieren.Mark
+}
+
+.namespace BoterKaasEieren
+{
+  .class public auto ansi MensSpeler
+  	extends BoterKaasEieren.Speler
+  {
+    .field  private  int32 tempMove
+
+    // method line 27
+    .method public hidebysig  specialname  rtspecialname 
+           instance default void '.ctor' (string naam, class BoterKaasEieren.Mark mark)  cil managed 
+    {
+        // Method begins at RVA 0x268c
+	// Code size 26 (0x1a)
+	.maxstack 4
+	.locals init (
+		object	V_0)
+	IL_0000:  ldarg.0 
+	IL_0001:  ldarg 1
+
+	IL_0005:  ldarg 2
+
+	IL_0009:  call instance void class BoterKaasEieren.Speler::'.ctor'(string, class BoterKaasEieren.Mark)
+	IL_000e:  ldarg.0 
+	IL_000f:  ldc.i4 -1
+	IL_0014:  stfld int32 BoterKaasEieren.MensSpeler::tempMove
+	IL_0019:  ret 
+    } // end of method MensSpeler::.ctor
+
+    // method line 28
+    .method public virtual  hidebysig 
+           instance default int32 BepaalZet (class BoterKaasEieren.Bord bord)  cil managed 
+    {
+        // Method begins at RVA 0x26b4
+	// Code size 68 (0x44)
+	.maxstack 7
+	.locals init (
+		object	V_0,
+		int32	V_1)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  call void class [mscorlib]System.Threading.Monitor::Enter(object)
+	IL_0007:  ldarg 1
+
+	IL_000b:  ldarg.0 
+	IL_000c:  ldfld int32 BoterKaasEieren.MensSpeler::tempMove
+	IL_0011:  call instance bool class BoterKaasEieren.Bord::IsCorrecteZet(int32)
+	IL_0016:  ldc.i4.0 
+	IL_0017:  ceq 
+	IL_0019:  brfalse IL_002a
+
+	IL_001e:  ldarg.0 
+	IL_001f:  call bool class [mscorlib]System.Threading.Monitor::Wait(object)
+	IL_0024:  pop 
+	IL_0025:  br IL_0007
+
+	IL_002a:  ldarg.0 
+	IL_002b:  call void class [mscorlib]System.Threading.Monitor::Exit(object)
+	IL_0030:  ldarg.0 
+	IL_0031:  ldfld int32 BoterKaasEieren.MensSpeler::tempMove
+	IL_0036:  stloc.1 
+	IL_0037:  ldarg.0 
+	IL_0038:  ldc.i4 -1
+	IL_003d:  stfld int32 BoterKaasEieren.MensSpeler::tempMove
+	IL_0042:  ldloc.1 
+	IL_0043:  ret 
+    } // end of method MensSpeler::BepaalZet
+
+    // method line 29
+    .method public hidebysig 
+           instance default int32 GetTempMove ()  cil managed 
+    {
+        // Method begins at RVA 0x2704
+	// Code size 8 (0x8)
+	.maxstack 2
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldfld int32 BoterKaasEieren.MensSpeler::tempMove
+	IL_0007:  ret 
+    } // end of method MensSpeler::GetTempMove
+
+    // method line 30
+    .method public hidebysig 
+           instance default void SetTempMove (int32 tempMove)  cil managed 
+    {
+        // Method begins at RVA 0x2718
+	// Code size 12 (0xc)
+	.maxstack 2
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldarg 1
+
+	IL_0006:  stfld int32 BoterKaasEieren.MensSpeler::tempMove
+	IL_000b:  ret 
+    } // end of method MensSpeler::SetTempMove
+
+  } // end of class BoterKaasEieren.MensSpeler
+}
+
+.namespace BoterKaasEieren
+{
+  .class public auto ansi Spel
+  	extends [mscorlib]System.Object
+  {
+    .field  public static  initonly  int32 AANTAL_SPELERS
+    .field  private  class BoterKaasEieren.Speler[] spelers
+    .field  private  int32 huidig
+    .field  private  class BoterKaasEieren.Bord bord
+    .field  private  class [mscorlib]System.Collections.ArrayList listeners
+
+    // method line 31
+    .method public hidebysig  specialname  rtspecialname 
+           instance default void '.ctor' (class BoterKaasEieren.Speler s1, class BoterKaasEieren.Speler s2)  cil managed 
+    {
+        // Method begins at RVA 0x2730
+	// Code size 75 (0x4b)
+	.maxstack 7
+	.locals init (
+		object	V_0)
+	IL_0000:  ldarg.0 
+	IL_0001:  call instance void object::'.ctor'()
+	IL_0006:  ldarg.0 
+	IL_0007:  ldc.i4 2
+	IL_000c:  newarr BoterKaasEieren.Speler
+	IL_0011:  dup 
+	IL_0012:  ldc.i4 0
+	IL_0017:  ldarg 1
+
+	IL_001b:  stelem.any BoterKaasEieren.Speler
+	IL_0020:  dup 
+	IL_0021:  ldc.i4 1
+	IL_0026:  ldarg 2
+
+	IL_002a:  stelem.any BoterKaasEieren.Speler
+	IL_002f:  stfld class BoterKaasEieren.Speler[] BoterKaasEieren.Spel::spelers
+	IL_0034:  ldarg.0 
+	IL_0035:  newobj instance void class [mscorlib]System.Collections.ArrayList::'.ctor'()
+	IL_003a:  stfld class [mscorlib]System.Collections.ArrayList BoterKaasEieren.Spel::listeners
+	IL_003f:  ldarg.0 
+	IL_0040:  newobj instance void class BoterKaasEieren.Bord::'.ctor'()
+	IL_0045:  stfld class BoterKaasEieren.Bord BoterKaasEieren.Spel::bord
+	IL_004a:  ret 
+    } // end of method Spel::.ctor
+
+    // method line 32
+    .method public static  specialname  rtspecialname 
+           default void '.cctor' ()  cil managed 
+    {
+        // Method begins at RVA 0x2788
+	// Code size 12 (0xc)
+	.maxstack 1
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldc.i4 2
+	IL_0006:  stsfld int32 BoterKaasEieren.Spel::AANTAL_SPELERS
+	IL_000b:  ret 
+    } // end of method Spel::.cctor
+
+    // method line 33
+    .method public hidebysig 
+           instance default class BoterKaasEieren.Bord GetBord ()  cil managed 
+    {
+        // Method begins at RVA 0x27a0
+	// Code size 8 (0x8)
+	.maxstack 2
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldfld class BoterKaasEieren.Bord BoterKaasEieren.Spel::bord
+	IL_0007:  ret 
+    } // end of method Spel::GetBord
+
+    // method line 34
+    .method public hidebysig 
+           instance default int32 GetHuidig ()  cil managed 
+    {
+        // Method begins at RVA 0x27b4
+	// Code size 8 (0x8)
+	.maxstack 2
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldfld int32 BoterKaasEieren.Spel::huidig
+	IL_0007:  ret 
+    } // end of method Spel::GetHuidig
+
+    // method line 35
+    .method public hidebysig 
+           instance default class BoterKaasEieren.Speler GetHuidigeSpeler ()  cil managed 
+    {
+        // Method begins at RVA 0x27c8
+	// Code size 19 (0x13)
+	.maxstack 3
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldfld class BoterKaasEieren.Speler[] BoterKaasEieren.Spel::spelers
+	IL_0007:  ldarg.0 
+	IL_0008:  ldfld int32 BoterKaasEieren.Spel::huidig
+	IL_000d:  ldelem.any BoterKaasEieren.Speler
+	IL_0012:  ret 
+    } // end of method Spel::GetHuidigeSpeler
+
+    // method line 36
+    .method public hidebysig 
+           instance default class BoterKaasEieren.Speler[] GetSpelers ()  cil managed 
+    {
+        // Method begins at RVA 0x27e8
+	// Code size 8 (0x8)
+	.maxstack 2
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldfld class BoterKaasEieren.Speler[] BoterKaasEieren.Spel::spelers
+	IL_0007:  ret 
+    } // end of method Spel::GetSpelers
+
+    // method line 37
+    .method public hidebysig 
+           instance default void Reset ()  cil managed 
+    {
+        // Method begins at RVA 0x27fc
+	// Code size 24 (0x18)
+	.maxstack 4
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldfld class BoterKaasEieren.Bord BoterKaasEieren.Spel::bord
+	IL_0007:  call instance void class BoterKaasEieren.Bord::Reset()
+	IL_000c:  ldarg.0 
+	IL_000d:  ldc.i4 0
+	IL_0012:  stfld int32 BoterKaasEieren.Spel::huidig
+	IL_0017:  ret 
+    } // end of method Spel::Reset
+
+    // method line 38
+    .method public hidebysig 
+           instance default void Play ()  cil managed 
+    {
+        // Method begins at RVA 0x2820
+	// Code size 157 (0x9d)
+	.maxstack 14
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldnull 
+	IL_0003:  call instance void class BoterKaasEieren.Spel::Update(object)
+	IL_0008:  ldarg.0 
+	IL_0009:  ldfld class BoterKaasEieren.Bord BoterKaasEieren.Spel::bord
+	IL_000e:  call instance bool class BoterKaasEieren.Bord::GameOver()
+	IL_0013:  ldc.i4.0 
+	IL_0014:  ceq 
+	IL_0016:  brfalse IL_0060
+
+	IL_001b:  ldarg.0 
+	IL_001c:  ldfld class BoterKaasEieren.Speler[] BoterKaasEieren.Spel::spelers
+	IL_0021:  ldarg.0 
+	IL_0022:  ldfld int32 BoterKaasEieren.Spel::huidig
+	IL_0027:  ldelem.any BoterKaasEieren.Speler
+	IL_002c:  ldarg.0 
+	IL_002d:  ldfld class BoterKaasEieren.Bord BoterKaasEieren.Spel::bord
+	IL_0032:  call instance void class BoterKaasEieren.Speler::DoeZet(class BoterKaasEieren.Bord)
+	IL_0037:  ldarg.0 
+	IL_0038:  ldarg.0 
+	IL_0039:  ldfld int32 BoterKaasEieren.Spel::huidig
+	IL_003e:  ldc.i4 1
+	IL_0043:  add 
+	IL_0044:  ldsfld int32 BoterKaasEieren.Spel::AANTAL_SPELERS
+	IL_0049:  rem 
+	IL_004a:  stfld int32 BoterKaasEieren.Spel::huidig
+	IL_004f:  ldarg.0 
+	IL_0050:  ldarg.0 
+	IL_0051:  ldfld class BoterKaasEieren.Bord BoterKaasEieren.Spel::bord
+	IL_0056:  call instance void class BoterKaasEieren.Spel::Update(object)
+	IL_005b:  br IL_0008
+
+	IL_0060:  ldarg.0 
+	IL_0061:  ldarg.0 
+	IL_0062:  ldfld class BoterKaasEieren.Bord BoterKaasEieren.Spel::bord
+	IL_0067:  call instance bool class BoterKaasEieren.Bord::HeeftWinnaar()
+	IL_006c:  brfalse IL_008d
+
+	IL_0071:  ldarg.0 
+	IL_0072:  ldfld int32 BoterKaasEieren.Spel::huidig
+	IL_0077:  ldc.i4 1
+	IL_007c:  add 
+	IL_007d:  ldsfld int32 BoterKaasEieren.Spel::AANTAL_SPELERS
+	IL_0082:  rem 
+	IL_0083:  box [mscorlib]System.Int32
+	IL_0088:  br IL_0097
+
+	IL_008d:  ldc.i4 -1
+	IL_0092:  box [mscorlib]System.Int32
+	IL_0097:  call instance void class BoterKaasEieren.Spel::Update(object)
+	IL_009c:  ret 
+    } // end of method Spel::Play
+
+    // method line 39
+    .method public hidebysig 
+           instance default void AddObserver (class BoterKaasEieren.IMessageListener l)  cil managed 
+    {
+        // Method begins at RVA 0x28cc
+	// Code size 18 (0x12)
+	.maxstack 3
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldfld class [mscorlib]System.Collections.ArrayList BoterKaasEieren.Spel::listeners
+	IL_0007:  ldarg 1
+
+	IL_000b:  callvirt instance int32 class [mscorlib]System.Collections.ArrayList::Add(object)
+	IL_0010:  pop 
+	IL_0011:  ret 
+    } // end of method Spel::AddObserver
+
+    // method line 40
+    .method public hidebysig 
+           instance default void RemoveObserver (class BoterKaasEieren.IMessageListener l)  cil managed 
+    {
+        // Method begins at RVA 0x28ec
+	// Code size 17 (0x11)
+	.maxstack 3
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldfld class [mscorlib]System.Collections.ArrayList BoterKaasEieren.Spel::listeners
+	IL_0007:  ldarg 1
+
+	IL_000b:  callvirt instance void class [mscorlib]System.Collections.ArrayList::Remove(object)
+	IL_0010:  ret 
+    } // end of method Spel::RemoveObserver
+
+    // method line 41
+    .method public hidebysig 
+           instance default void Update (object msg)  cil managed 
+    {
+        // Method begins at RVA 0x290c
+	// Code size 113 (0x71)
+	.maxstack 15
+	.locals init (
+		object	V_0,
+		class BoterKaasEieren.IMessageListener	V_1)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldfld class [mscorlib]System.Collections.ArrayList BoterKaasEieren.Spel::listeners
+	IL_0007:  callvirt instance class [mscorlib]System.Collections.IEnumerator class [mscorlib]System.Collections.IEnumerable::GetEnumerator()
+	IL_000c:  dup 
+	IL_000d:  callvirt instance bool class [mscorlib]System.Collections.IEnumerator::MoveNext()
+	IL_0012:  brfalse IL_006f
+
+	IL_0017:  dup 
+	IL_0018:  callvirt instance object class [mscorlib]System.Collections.IEnumerator::get_Current()
+	IL_001d:  castclass BoterKaasEieren.IMessageListener
+	IL_0022:  stloc.1 
+	IL_0023:  ldloc.1 
+	IL_0024:  callvirt instance bool class [System]System.ComponentModel.ISynchronizeInvoke::get_InvokeRequired()
+	IL_0029:  brfalse IL_0060
+
+	IL_002e:  ldloc.1 
+	IL_002f:  ldloc.1 
+	IL_0030:  dup 
+	IL_0031:  ldvirtftn instance void class BoterKaasEieren.IMessageListener::MessageReceived(object)
+	IL_0037:  newobj instance void class [mscorlib]System.Threading.ParameterizedThreadStart::'.ctor'(object, native int)
+	IL_003c:  ldc.i4 1
+	IL_0041:  newarr [mscorlib]System.Object
+	IL_0046:  dup 
+	IL_0047:  ldc.i4 0
+	IL_004c:  ldarg 1
+
+	IL_0050:  stelem.any [mscorlib]System.Object
+	IL_0055:  callvirt instance object class [System]System.ComponentModel.ISynchronizeInvoke::Invoke(class [mscorlib]System.Delegate, object[])
+	IL_005a:  pop 
+	IL_005b:  br IL_006a
+
+	IL_0060:  ldloc.1 
+	IL_0061:  ldarg 1
+
+	IL_0065:  callvirt instance void class BoterKaasEieren.IMessageListener::MessageReceived(object)
+	IL_006a:  br IL_000c
+
+	IL_006f:  pop 
+	IL_0070:  ret 
+    } // end of method Spel::Update
+
+  } // end of class BoterKaasEieren.Spel
+}
+
+.namespace BoterKaasEieren
+{
+  .class public auto ansi ComputerSpeler
+  	extends BoterKaasEieren.Speler
+  {
+    .field  private  class BoterKaasEieren.IStrategie strategie
+
+    // method line 42
+    .method public hidebysig  specialname  rtspecialname 
+           instance default void '.ctor' (string naam, class BoterKaasEieren.Mark mark, class BoterKaasEieren.IStrategie strategie)  cil managed 
+    {
+        // Method begins at RVA 0x298c
+	// Code size 25 (0x19)
+	.maxstack 4
+	.locals init (
+		object	V_0)
+	IL_0000:  ldarg.0 
+	IL_0001:  ldarg 1
+
+	IL_0005:  ldarg 2
+
+	IL_0009:  call instance void class BoterKaasEieren.Speler::'.ctor'(string, class BoterKaasEieren.Mark)
+	IL_000e:  ldarg.0 
+	IL_000f:  ldarg 3
+
+	IL_0013:  stfld class BoterKaasEieren.IStrategie BoterKaasEieren.ComputerSpeler::strategie
+	IL_0018:  ret 
+    } // end of method ComputerSpeler::.ctor
+
+    // method line 43
+    .method public virtual  hidebysig 
+           instance default int32 BepaalZet (class BoterKaasEieren.Bord bord)  cil managed 
+    {
+        // Method begins at RVA 0x29b4
+	// Code size 23 (0x17)
+	.maxstack 6
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldfld class BoterKaasEieren.IStrategie BoterKaasEieren.ComputerSpeler::strategie
+	IL_0007:  ldarg 1
+
+	IL_000b:  ldarg.0 
+	IL_000c:  call instance class BoterKaasEieren.Mark class BoterKaasEieren.Speler::GetMark()
+	IL_0011:  callvirt instance int32 class BoterKaasEieren.IStrategie::BerekenZet(class BoterKaasEieren.Bord, class BoterKaasEieren.Mark)
+	IL_0016:  ret 
+    } // end of method ComputerSpeler::BepaalZet
+
+    // method line 44
+    .method public hidebysig 
+           instance default class BoterKaasEieren.IStrategie GetStrategie ()  cil managed 
+    {
+        // Method begins at RVA 0x29d8
+	// Code size 8 (0x8)
+	.maxstack 2
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldfld class BoterKaasEieren.IStrategie BoterKaasEieren.ComputerSpeler::strategie
+	IL_0007:  ret 
+    } // end of method ComputerSpeler::GetStrategie
+
+    // method line 45
+    .method public hidebysig 
+           instance default void SetStrategie (class BoterKaasEieren.IStrategie strategie)  cil managed 
+    {
+        // Method begins at RVA 0x29ec
+	// Code size 12 (0xc)
+	.maxstack 2
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldarg 1
+
+	IL_0006:  stfld class BoterKaasEieren.IStrategie BoterKaasEieren.ComputerSpeler::strategie
+	IL_000b:  ret 
+    } // end of method ComputerSpeler::SetStrategie
+
+  } // end of class BoterKaasEieren.ComputerSpeler
+}
+
+.namespace BoterKaasEieren
+{
+  .class interface public auto ansi abstract IStrategie
+  {
+
+    // method line 46
+    .method public virtual  hidebysig  newslot  abstract 
+           instance default int32 BerekenZet (class BoterKaasEieren.Bord bord, class BoterKaasEieren.Mark mark)  cil managed 
+    {
+        // Method begins at RVA 0x0
+    } // end of method IStrategie::BerekenZet
+
+  } // end of class BoterKaasEieren.IStrategie
+}
+
+.namespace BoterKaasEieren
+{
+  .class public auto ansi abstract Speler
+  	extends [mscorlib]System.Object
+  {
+    .field  private  string naam
+    .field  private  class BoterKaasEieren.Mark mark
+
+    // method line 47
+    .method family hidebysig  specialname  rtspecialname 
+           instance default void '.ctor' (string naam, class BoterKaasEieren.Mark mark)  cil managed 
+    {
+        // Method begins at RVA 0x2a04
+	// Code size 27 (0x1b)
+	.maxstack 4
+	.locals init (
+		object	V_0)
+	IL_0000:  ldarg.0 
+	IL_0001:  call instance void object::'.ctor'()
+	IL_0006:  ldarg.0 
+	IL_0007:  ldarg 1
+
+	IL_000b:  stfld string BoterKaasEieren.Speler::naam
+	IL_0010:  ldarg.0 
+	IL_0011:  ldarg 2
+
+	IL_0015:  stfld class BoterKaasEieren.Mark BoterKaasEieren.Speler::mark
+	IL_001a:  ret 
+    } // end of method Speler::.ctor
+
+    // method line 48
+    .method public hidebysig 
+           instance default void DoeZet (class BoterKaasEieren.Bord bord)  cil managed 
+    {
+        // Method begins at RVA 0x2a2c
+	// Code size 29 (0x1d)
+	.maxstack 6
+	.locals init (
+		object	V_0,
+		int32	V_1)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldarg 1
+
+	IL_0006:  callvirt instance int32 class BoterKaasEieren.Speler::BepaalZet(class BoterKaasEieren.Bord)
+	IL_000b:  stloc.1 
+	IL_000c:  ldarg 1
+
+	IL_0010:  ldloc.1 
+	IL_0011:  ldarg.0 
+	IL_0012:  ldfld class BoterKaasEieren.Mark BoterKaasEieren.Speler::mark
+	IL_0017:  call instance void class BoterKaasEieren.Bord::SetVakje(int32, class BoterKaasEieren.Mark)
+	IL_001c:  ret 
+    } // end of method Speler::DoeZet
+
+    // method line 49
+    .method public hidebysig 
+           instance default string GetNaam ()  cil managed 
+    {
+        // Method begins at RVA 0x2a58
+	// Code size 8 (0x8)
+	.maxstack 2
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldfld string BoterKaasEieren.Speler::naam
+	IL_0007:  ret 
+    } // end of method Speler::GetNaam
+
+    // method line 50
+    .method public hidebysig 
+           instance default class BoterKaasEieren.Mark GetMark ()  cil managed 
+    {
+        // Method begins at RVA 0x2a6c
+	// Code size 8 (0x8)
+	.maxstack 2
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldfld class BoterKaasEieren.Mark BoterKaasEieren.Speler::mark
+	IL_0007:  ret 
+    } // end of method Speler::GetMark
+
+    // method line 51
+    .method public virtual  hidebysig  abstract 
+           instance default int32 BepaalZet (class BoterKaasEieren.Bord bord)  cil managed 
+    {
+        // Method begins at RVA 0x0
+    } // end of method Speler::BepaalZet
+
+  } // end of class BoterKaasEieren.Speler
+}
+
+.namespace BoterKaasEieren
+{
+  .class public auto ansi BkeGui
+  	extends [System.Windows.Forms]System.Windows.Forms.Form
+  	implements BoterKaasEieren.IMessageListener  {
+    .field  private  class BoterKaasEieren.Spel spel
+    .field  private  class [System.Windows.Forms]System.Windows.Forms.Button button
+    .field  private  class [System.Windows.Forms]System.Windows.Forms.Button[] tiles
+    .field  private  class [System.Windows.Forms]System.Windows.Forms.Label label
+    .field  private  class [System.Windows.Forms]System.Windows.Forms.RadioButton s1radio1
+    .field  private  class [System.Windows.Forms]System.Windows.Forms.RadioButton s1radio2
+    .field  private  class [System.Windows.Forms]System.Windows.Forms.RadioButton s1radio3
+    .field  private  class [System.Windows.Forms]System.Windows.Forms.RadioButton s2radio1
+    .field  private  class [System.Windows.Forms]System.Windows.Forms.RadioButton s2radio2
+    .field  private  class [System.Windows.Forms]System.Windows.Forms.RadioButton s2radio3
+
+    // method line 52
+    .method public hidebysig  specialname  rtspecialname 
+           instance default void '.ctor' ()  cil managed 
+    {
+        // Method begins at RVA 0x2a80
+	// Code size 1085 (0x43d)
+	.maxstack 133
+	.locals init (
+		object	V_0,
+		class [System.Windows.Forms]System.Windows.Forms.Panel	V_1,
+		class [System.Windows.Forms]System.Windows.Forms.Label	V_2,
+		int32	V_3,
+		class [System.Windows.Forms]System.Windows.Forms.Button	V_4)
+	IL_0000:  ldarg.0 
+	IL_0001:  call instance void class [System.Windows.Forms]System.Windows.Forms.Form::'.ctor'()
+	IL_0006:  ldarg.0 
+	IL_0007:  ldstr "Boter Kaas Eieren"
+	IL_000c:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Form::set_Text(string)
+	IL_0011:  ldarg.0 
+	IL_0012:  ldc.i4 350
+	IL_0017:  ldc.i4 300
+	IL_001c:  newobj instance void valuetype [System.Drawing]System.Drawing.Size::'.ctor'(int32, int32)
+	IL_0021:  call instance void class [System.Windows.Forms]System.Windows.Forms.Form::set_Size(valuetype [System.Drawing]System.Drawing.Size)
+	IL_0026:  newobj instance void class [System.Windows.Forms]System.Windows.Forms.Panel::'.ctor'()
+	IL_002b:  stloc.1 
+	IL_002c:  ldloc.1 
+	IL_002d:  ldc.i4 80
+	IL_0032:  ldc.i4 80
+	IL_0037:  newobj instance void valuetype [System.Drawing]System.Drawing.Size::'.ctor'(int32, int32)
+	IL_003c:  call instance void class [System.Windows.Forms]System.Windows.Forms.Control::set_Size(valuetype [System.Drawing]System.Drawing.Size)
+	IL_0041:  ldloc.1 
+	IL_0042:  ldc.i4 10
+	IL_0047:  ldc.i4 10
+	IL_004c:  newobj instance void valuetype [System.Drawing]System.Drawing.Point::'.ctor'(int32, int32)
+	IL_0051:  call instance void class [System.Windows.Forms]System.Windows.Forms.Control::set_Location(valuetype [System.Drawing]System.Drawing.Point)
+	IL_0056:  ldarg.0 
+	IL_0057:  call instance class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection class [System.Windows.Forms]System.Windows.Forms.Control::get_Controls()
+	IL_005c:  ldloc.1 
+	IL_005d:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection::Add(class [System.Windows.Forms]System.Windows.Forms.Control)
+	IL_0062:  newobj instance void class [System.Windows.Forms]System.Windows.Forms.Label::'.ctor'()
+	IL_0067:  stloc.2 
+	IL_0068:  ldloc.2 
+	IL_0069:  ldstr "Speler 1"
+	IL_006e:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Label::set_Text(string)
+	IL_0073:  ldloc.1 
+	IL_0074:  call instance class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection class [System.Windows.Forms]System.Windows.Forms.Control::get_Controls()
+	IL_0079:  ldloc.2 
+	IL_007a:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection::Add(class [System.Windows.Forms]System.Windows.Forms.Control)
+	IL_007f:  ldarg.0 
+	IL_0080:  newobj instance void class [System.Windows.Forms]System.Windows.Forms.RadioButton::'.ctor'()
+	IL_0085:  stfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s1radio1
+	IL_008a:  ldarg.0 
+	IL_008b:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s1radio1
+	IL_0090:  ldstr "Human"
+	IL_0095:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.ButtonBase::set_Text(string)
+	IL_009a:  ldarg.0 
+	IL_009b:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s1radio1
+	IL_00a0:  ldc.i4.1 
+	IL_00a1:  call instance void class [System.Windows.Forms]System.Windows.Forms.RadioButton::set_Checked(bool)
+	IL_00a6:  ldarg.0 
+	IL_00a7:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s1radio1
+	IL_00ac:  ldc.i4 0
+	IL_00b1:  ldc.i4 20
+	IL_00b6:  newobj instance void valuetype [System.Drawing]System.Drawing.Point::'.ctor'(int32, int32)
+	IL_00bb:  call instance void class [System.Windows.Forms]System.Windows.Forms.Control::set_Location(valuetype [System.Drawing]System.Drawing.Point)
+	IL_00c0:  ldloc.1 
+	IL_00c1:  call instance class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection class [System.Windows.Forms]System.Windows.Forms.Control::get_Controls()
+	IL_00c6:  ldarg.0 
+	IL_00c7:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s1radio1
+	IL_00cc:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection::Add(class [System.Windows.Forms]System.Windows.Forms.Control)
+	IL_00d1:  ldarg.0 
+	IL_00d2:  newobj instance void class [System.Windows.Forms]System.Windows.Forms.RadioButton::'.ctor'()
+	IL_00d7:  stfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s1radio2
+	IL_00dc:  ldarg.0 
+	IL_00dd:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s1radio2
+	IL_00e2:  ldstr "Domme AI"
+	IL_00e7:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.ButtonBase::set_Text(string)
+	IL_00ec:  ldarg.0 
+	IL_00ed:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s1radio2
+	IL_00f2:  ldc.i4 0
+	IL_00f7:  ldc.i4 40
+	IL_00fc:  newobj instance void valuetype [System.Drawing]System.Drawing.Point::'.ctor'(int32, int32)
+	IL_0101:  call instance void class [System.Windows.Forms]System.Windows.Forms.Control::set_Location(valuetype [System.Drawing]System.Drawing.Point)
+	IL_0106:  ldloc.1 
+	IL_0107:  call instance class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection class [System.Windows.Forms]System.Windows.Forms.Control::get_Controls()
+	IL_010c:  ldarg.0 
+	IL_010d:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s1radio2
+	IL_0112:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection::Add(class [System.Windows.Forms]System.Windows.Forms.Control)
+	IL_0117:  ldarg.0 
+	IL_0118:  newobj instance void class [System.Windows.Forms]System.Windows.Forms.RadioButton::'.ctor'()
+	IL_011d:  stfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s1radio3
+	IL_0122:  ldarg.0 
+	IL_0123:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s1radio3
+	IL_0128:  ldstr "Slimme AI"
+	IL_012d:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.ButtonBase::set_Text(string)
+	IL_0132:  ldarg.0 
+	IL_0133:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s1radio3
+	IL_0138:  ldc.i4 0
+	IL_013d:  ldc.i4 60
+	IL_0142:  newobj instance void valuetype [System.Drawing]System.Drawing.Point::'.ctor'(int32, int32)
+	IL_0147:  call instance void class [System.Windows.Forms]System.Windows.Forms.Control::set_Location(valuetype [System.Drawing]System.Drawing.Point)
+	IL_014c:  ldloc.1 
+	IL_014d:  call instance class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection class [System.Windows.Forms]System.Windows.Forms.Control::get_Controls()
+	IL_0152:  ldarg.0 
+	IL_0153:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s1radio3
+	IL_0158:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection::Add(class [System.Windows.Forms]System.Windows.Forms.Control)
+	IL_015d:  newobj instance void class [System.Windows.Forms]System.Windows.Forms.Panel::'.ctor'()
+	IL_0162:  stloc.1 
+	IL_0163:  ldloc.1 
+	IL_0164:  ldc.i4 80
+	IL_0169:  ldc.i4 80
+	IL_016e:  newobj instance void valuetype [System.Drawing]System.Drawing.Size::'.ctor'(int32, int32)
+	IL_0173:  call instance void class [System.Windows.Forms]System.Windows.Forms.Control::set_Size(valuetype [System.Drawing]System.Drawing.Size)
+	IL_0178:  ldloc.1 
+	IL_0179:  ldc.i4 100
+	IL_017e:  ldc.i4 10
+	IL_0183:  newobj instance void valuetype [System.Drawing]System.Drawing.Point::'.ctor'(int32, int32)
+	IL_0188:  call instance void class [System.Windows.Forms]System.Windows.Forms.Control::set_Location(valuetype [System.Drawing]System.Drawing.Point)
+	IL_018d:  ldarg.0 
+	IL_018e:  call instance class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection class [System.Windows.Forms]System.Windows.Forms.Control::get_Controls()
+	IL_0193:  ldloc.1 
+	IL_0194:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection::Add(class [System.Windows.Forms]System.Windows.Forms.Control)
+	IL_0199:  newobj instance void class [System.Windows.Forms]System.Windows.Forms.Label::'.ctor'()
+	IL_019e:  stloc.2 
+	IL_019f:  ldloc.2 
+	IL_01a0:  ldstr "Speler 2"
+	IL_01a5:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Label::set_Text(string)
+	IL_01aa:  ldloc.1 
+	IL_01ab:  call instance class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection class [System.Windows.Forms]System.Windows.Forms.Control::get_Controls()
+	IL_01b0:  ldloc.2 
+	IL_01b1:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection::Add(class [System.Windows.Forms]System.Windows.Forms.Control)
+	IL_01b6:  ldarg.0 
+	IL_01b7:  newobj instance void class [System.Windows.Forms]System.Windows.Forms.RadioButton::'.ctor'()
+	IL_01bc:  stfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s2radio1
+	IL_01c1:  ldarg.0 
+	IL_01c2:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s2radio1
+	IL_01c7:  ldstr "Human"
+	IL_01cc:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.ButtonBase::set_Text(string)
+	IL_01d1:  ldarg.0 
+	IL_01d2:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s2radio1
+	IL_01d7:  ldc.i4.1 
+	IL_01d8:  call instance void class [System.Windows.Forms]System.Windows.Forms.RadioButton::set_Checked(bool)
+	IL_01dd:  ldarg.0 
+	IL_01de:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s2radio1
+	IL_01e3:  ldc.i4 0
+	IL_01e8:  ldc.i4 20
+	IL_01ed:  newobj instance void valuetype [System.Drawing]System.Drawing.Point::'.ctor'(int32, int32)
+	IL_01f2:  call instance void class [System.Windows.Forms]System.Windows.Forms.Control::set_Location(valuetype [System.Drawing]System.Drawing.Point)
+	IL_01f7:  ldloc.1 
+	IL_01f8:  call instance class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection class [System.Windows.Forms]System.Windows.Forms.Control::get_Controls()
+	IL_01fd:  ldarg.0 
+	IL_01fe:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s2radio1
+	IL_0203:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection::Add(class [System.Windows.Forms]System.Windows.Forms.Control)
+	IL_0208:  ldarg.0 
+	IL_0209:  newobj instance void class [System.Windows.Forms]System.Windows.Forms.RadioButton::'.ctor'()
+	IL_020e:  stfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s2radio2
+	IL_0213:  ldarg.0 
+	IL_0214:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s2radio2
+	IL_0219:  ldstr "Domme AI"
+	IL_021e:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.ButtonBase::set_Text(string)
+	IL_0223:  ldarg.0 
+	IL_0224:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s2radio2
+	IL_0229:  ldc.i4 0
+	IL_022e:  ldc.i4 40
+	IL_0233:  newobj instance void valuetype [System.Drawing]System.Drawing.Point::'.ctor'(int32, int32)
+	IL_0238:  call instance void class [System.Windows.Forms]System.Windows.Forms.Control::set_Location(valuetype [System.Drawing]System.Drawing.Point)
+	IL_023d:  ldloc.1 
+	IL_023e:  call instance class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection class [System.Windows.Forms]System.Windows.Forms.Control::get_Controls()
+	IL_0243:  ldarg.0 
+	IL_0244:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s2radio2
+	IL_0249:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection::Add(class [System.Windows.Forms]System.Windows.Forms.Control)
+	IL_024e:  ldarg.0 
+	IL_024f:  newobj instance void class [System.Windows.Forms]System.Windows.Forms.RadioButton::'.ctor'()
+	IL_0254:  stfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s2radio3
+	IL_0259:  ldarg.0 
+	IL_025a:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s2radio3
+	IL_025f:  ldstr "Slimme AI"
+	IL_0264:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.ButtonBase::set_Text(string)
+	IL_0269:  ldarg.0 
+	IL_026a:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s2radio3
+	IL_026f:  ldc.i4 0
+	IL_0274:  ldc.i4 60
+	IL_0279:  newobj instance void valuetype [System.Drawing]System.Drawing.Point::'.ctor'(int32, int32)
+	IL_027e:  call instance void class [System.Windows.Forms]System.Windows.Forms.Control::set_Location(valuetype [System.Drawing]System.Drawing.Point)
+	IL_0283:  ldloc.1 
+	IL_0284:  call instance class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection class [System.Windows.Forms]System.Windows.Forms.Control::get_Controls()
+	IL_0289:  ldarg.0 
+	IL_028a:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s2radio3
+	IL_028f:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection::Add(class [System.Windows.Forms]System.Windows.Forms.Control)
+	IL_0294:  newobj instance void class [System.Windows.Forms]System.Windows.Forms.Panel::'.ctor'()
+	IL_0299:  stloc.1 
+	IL_029a:  ldloc.1 
+	IL_029b:  ldc.i4 250
+	IL_02a0:  ldc.i4 250
+	IL_02a5:  newobj instance void valuetype [System.Drawing]System.Drawing.Size::'.ctor'(int32, int32)
+	IL_02aa:  call instance void class [System.Windows.Forms]System.Windows.Forms.Control::set_Size(valuetype [System.Drawing]System.Drawing.Size)
+	IL_02af:  ldloc.1 
+	IL_02b0:  ldc.i4 25
+	IL_02b5:  ldc.i4 110
+	IL_02ba:  newobj instance void valuetype [System.Drawing]System.Drawing.Point::'.ctor'(int32, int32)
+	IL_02bf:  call instance void class [System.Windows.Forms]System.Windows.Forms.Control::set_Location(valuetype [System.Drawing]System.Drawing.Point)
+	IL_02c4:  ldarg.0 
+	IL_02c5:  call instance class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection class [System.Windows.Forms]System.Windows.Forms.Control::get_Controls()
+	IL_02ca:  ldloc.1 
+	IL_02cb:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection::Add(class [System.Windows.Forms]System.Windows.Forms.Control)
+	IL_02d0:  ldarg.0 
+	IL_02d1:  ldc.i4 9
+	IL_02d6:  newarr [System.Windows.Forms]System.Windows.Forms.Button
+	IL_02db:  stfld class [System.Windows.Forms]System.Windows.Forms.Button[] BoterKaasEieren.BkeGui::tiles
+	IL_02e0:  ldc.i4 0
+	IL_02e5:  stloc.3 
+	IL_02e6:  ldloc.3 
+	IL_02e7:  ldc.i4 9
+	IL_02ec:  clt 
+	IL_02ee:  brfalse IL_038d
+
+	IL_02f3:  newobj instance void class [System.Windows.Forms]System.Windows.Forms.Button::'.ctor'()
+	IL_02f8:  stloc.s 4
+	IL_02fa:  ldarg.0 
+	IL_02fb:  ldfld class [System.Windows.Forms]System.Windows.Forms.Button[] BoterKaasEieren.BkeGui::tiles
+	IL_0300:  ldloc.3 
+	IL_0301:  ldloc.s 4
+	IL_0303:  stelem.any [System.Windows.Forms]System.Windows.Forms.Button
+	IL_0308:  ldloc.s 4
+	IL_030a:  ldloca.s 3
+	IL_030c:  call instance string int32::ToString()
+	IL_0311:  call instance void class [System.Windows.Forms]System.Windows.Forms.Control::set_Name(string)
+	IL_0316:  ldloc.s 4
+	IL_0318:  ldloca.s 3
+	IL_031a:  call instance string int32::ToString()
+	IL_031f:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.ButtonBase::set_Text(string)
+	IL_0324:  ldloc.s 4
+	IL_0326:  ldc.i4 40
+	IL_032b:  ldc.i4 40
+	IL_0330:  newobj instance void valuetype [System.Drawing]System.Drawing.Size::'.ctor'(int32, int32)
+	IL_0335:  call instance void class [System.Windows.Forms]System.Windows.Forms.Control::set_Size(valuetype [System.Drawing]System.Drawing.Size)
+	IL_033a:  ldloc.s 4
+	IL_033c:  ldloc.3 
+	IL_033d:  ldc.i4 3
+	IL_0342:  rem 
+	IL_0343:  ldc.i4 40
+	IL_0348:  mul 
+	IL_0349:  ldloc.3 
+	IL_034a:  ldc.i4 3
+	IL_034f:  div 
+	IL_0350:  ldc.i4 40
+	IL_0355:  mul 
+	IL_0356:  newobj instance void valuetype [System.Drawing]System.Drawing.Point::'.ctor'(int32, int32)
+	IL_035b:  call instance void class [System.Windows.Forms]System.Windows.Forms.Control::set_Location(valuetype [System.Drawing]System.Drawing.Point)
+	IL_0360:  ldloc.s 4
+	IL_0362:  ldarg.0 
+	IL_0363:  ldftn instance void class BoterKaasEieren.BkeGui::move_Clicked(object, class [mscorlib]System.EventArgs)
+	IL_0369:  newobj instance void class [mscorlib]System.EventHandler::'.ctor'(object, native int)
+	IL_036e:  call instance void class [System.Windows.Forms]System.Windows.Forms.Control::add_Click(class [mscorlib]System.EventHandler)
+	IL_0373:  ldloc.1 
+	IL_0374:  call instance class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection class [System.Windows.Forms]System.Windows.Forms.Control::get_Controls()
+	IL_0379:  ldloc.s 4
+	IL_037b:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection::Add(class [System.Windows.Forms]System.Windows.Forms.Control)
+	IL_0380:  ldloc.3 
+	IL_0381:  ldc.i4 1
+	IL_0386:  add 
+	IL_0387:  stloc.3 
+	IL_0388:  br IL_02e6
+
+	IL_038d:  ldarg.0 
+	IL_038e:  newobj instance void class [System.Windows.Forms]System.Windows.Forms.Button::'.ctor'()
+	IL_0393:  stfld class [System.Windows.Forms]System.Windows.Forms.Button BoterKaasEieren.BkeGui::button
+	IL_0398:  ldarg.0 
+	IL_0399:  ldfld class [System.Windows.Forms]System.Windows.Forms.Button BoterKaasEieren.BkeGui::button
+	IL_039e:  ldc.i4 180
+	IL_03a3:  ldc.i4 20
+	IL_03a8:  newobj instance void valuetype [System.Drawing]System.Drawing.Point::'.ctor'(int32, int32)
+	IL_03ad:  call instance void class [System.Windows.Forms]System.Windows.Forms.Control::set_Location(valuetype [System.Drawing]System.Drawing.Point)
+	IL_03b2:  ldarg.0 
+	IL_03b3:  ldfld class [System.Windows.Forms]System.Windows.Forms.Button BoterKaasEieren.BkeGui::button
+	IL_03b8:  ldstr "Start!"
+	IL_03bd:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.ButtonBase::set_Text(string)
+	IL_03c2:  ldarg.0 
+	IL_03c3:  ldfld class [System.Windows.Forms]System.Windows.Forms.Button BoterKaasEieren.BkeGui::button
+	IL_03c8:  ldarg.0 
+	IL_03c9:  ldftn instance void class BoterKaasEieren.BkeGui::button_Clicked(object, class [mscorlib]System.EventArgs)
+	IL_03cf:  newobj instance void class [mscorlib]System.EventHandler::'.ctor'(object, native int)
+	IL_03d4:  call instance void class [System.Windows.Forms]System.Windows.Forms.Control::add_Click(class [mscorlib]System.EventHandler)
+	IL_03d9:  ldarg.0 
+	IL_03da:  call instance class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection class [System.Windows.Forms]System.Windows.Forms.Control::get_Controls()
+	IL_03df:  ldarg.0 
+	IL_03e0:  ldfld class [System.Windows.Forms]System.Windows.Forms.Button BoterKaasEieren.BkeGui::button
+	IL_03e5:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection::Add(class [System.Windows.Forms]System.Windows.Forms.Control)
+	IL_03ea:  ldarg.0 
+	IL_03eb:  newobj instance void class [System.Windows.Forms]System.Windows.Forms.Label::'.ctor'()
+	IL_03f0:  stfld class [System.Windows.Forms]System.Windows.Forms.Label BoterKaasEieren.BkeGui::label
+	IL_03f5:  ldarg.0 
+	IL_03f6:  ldfld class [System.Windows.Forms]System.Windows.Forms.Label BoterKaasEieren.BkeGui::label
+	IL_03fb:  ldstr "Press the start button!"
+	IL_0400:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Label::set_Text(string)
+	IL_0405:  ldarg.0 
+	IL_0406:  ldfld class [System.Windows.Forms]System.Windows.Forms.Label BoterKaasEieren.BkeGui::label
+	IL_040b:  ldc.i4 180
+	IL_0410:  ldc.i4 50
+	IL_0415:  newobj instance void valuetype [System.Drawing]System.Drawing.Point::'.ctor'(int32, int32)
+	IL_041a:  call instance void class [System.Windows.Forms]System.Windows.Forms.Control::set_Location(valuetype [System.Drawing]System.Drawing.Point)
+	IL_041f:  ldarg.0 
+	IL_0420:  ldfld class [System.Windows.Forms]System.Windows.Forms.Label BoterKaasEieren.BkeGui::label
+	IL_0425:  ldc.i4.1 
+	IL_0426:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Label::set_AutoSize(bool)
+	IL_042b:  ldarg.0 
+	IL_042c:  call instance class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection class [System.Windows.Forms]System.Windows.Forms.Control::get_Controls()
+	IL_0431:  ldarg.0 
+	IL_0432:  ldfld class [System.Windows.Forms]System.Windows.Forms.Label BoterKaasEieren.BkeGui::label
+	IL_0437:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Control/ControlCollection::Add(class [System.Windows.Forms]System.Windows.Forms.Control)
+	IL_043c:  ret 
+    } // end of method BkeGui::.ctor
+
+    // method line 53
+    .method public static  hidebysig 
+           default void Main ()  cil managed 
+    {
+        // Method begins at RVA 0x2ecc
+	.entrypoint
+	// Code size 12 (0xc)
+	.maxstack 2
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  newobj instance void class BoterKaasEieren.BkeGui::'.ctor'()
+	IL_0006:  call void class [System.Windows.Forms]System.Windows.Forms.Application::Run(class [System.Windows.Forms]System.Windows.Forms.Form)
+	IL_000b:  ret 
+    } // end of method BkeGui::Main
+
+    // method line 54
+    .method public virtual  hidebysig  newslot 
+           instance default void MessageReceived (object message)  cil managed 
+    {
+        // Method begins at RVA 0x2ee4
+	// Code size 353 (0x161)
+	.maxstack 34
+	.locals init (
+		object	V_0,
+		int32	V_1,
+		class BoterKaasEieren.Speler	V_2,
+		class BoterKaasEieren.Bord	V_3,
+		int32	V_4,
+		class BoterKaasEieren.Speler	V_5,
+		int32	V_6,
+		class BoterKaasEieren.Speler	V_7)
+	IL_0000:  nop 
+	IL_0001:  ldarg 1
+
+	IL_0005:  ldnull 
+	IL_0006:  ceq 
+	IL_0008:  brfalse IL_0071
+
+	IL_000d:  ldc.i4 0
+	IL_0012:  stloc.1 
+	IL_0013:  ldloc.1 
+	IL_0014:  ldc.i4 9
+	IL_0019:  clt 
+	IL_001b:  brfalse IL_0045
+
+	IL_0020:  ldarg.0 
+	IL_0021:  ldfld class [System.Windows.Forms]System.Windows.Forms.Button[] BoterKaasEieren.BkeGui::tiles
+	IL_0026:  ldloc.1 
+	IL_0027:  ldelem.any [System.Windows.Forms]System.Windows.Forms.Button
+	IL_002c:  ldloca.s 1
+	IL_002e:  call instance string int32::ToString()
+	IL_0033:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.ButtonBase::set_Text(string)
+	IL_0038:  ldloc.1 
+	IL_0039:  ldc.i4 1
+	IL_003e:  add 
+	IL_003f:  stloc.1 
+	IL_0040:  br IL_0013
+
+	IL_0045:  ldarg.0 
+	IL_0046:  ldfld class BoterKaasEieren.Spel BoterKaasEieren.BkeGui::spel
+	IL_004b:  call instance class BoterKaasEieren.Speler class BoterKaasEieren.Spel::GetHuidigeSpeler()
+	IL_0050:  stloc.2 
+	IL_0051:  ldarg.0 
+	IL_0052:  ldfld class [System.Windows.Forms]System.Windows.Forms.Label BoterKaasEieren.BkeGui::label
+	IL_0057:  ldloc.2 
+	IL_0058:  call instance string class BoterKaasEieren.Speler::GetNaam()
+	IL_005d:  ldstr " is aan zet!"
+	IL_0062:  call string string::Concat(object, object)
+	IL_0067:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Label::set_Text(string)
+	IL_006c:  br IL_0160
+
+	IL_0071:  ldarg 1
+
+	IL_0075:  isinst BoterKaasEieren.Bord
+	IL_007a:  ldnull 
+	IL_007b:  cgt.un 
+	IL_007d:  brfalse IL_00fd
+
+	IL_0082:  ldarg 1
+
+	IL_0086:  castclass BoterKaasEieren.Bord
+	IL_008b:  stloc.3 
+	IL_008c:  ldc.i4 0
+	IL_0091:  stloc.s 4
+	IL_0093:  ldloc.s 4
+	IL_0095:  ldc.i4 9
+	IL_009a:  clt 
+	IL_009c:  brfalse IL_00cf
+
+	IL_00a1:  ldarg.0 
+	IL_00a2:  ldfld class [System.Windows.Forms]System.Windows.Forms.Button[] BoterKaasEieren.BkeGui::tiles
+	IL_00a7:  ldloc.s 4
+	IL_00a9:  ldelem.any [System.Windows.Forms]System.Windows.Forms.Button
+	IL_00ae:  ldloc.3 
+	IL_00af:  ldloc.s 4
+	IL_00b1:  call instance class BoterKaasEieren.Mark class BoterKaasEieren.Bord::GetVakje(int32)
+	IL_00b6:  callvirt instance string class BoterKaasEieren.Mark::ToString()
+	IL_00bb:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.ButtonBase::set_Text(string)
+	IL_00c0:  ldloc.s 4
+	IL_00c2:  ldc.i4 1
+	IL_00c7:  add 
+	IL_00c8:  stloc.s 4
+	IL_00ca:  br IL_0093
+
+	IL_00cf:  ldarg.0 
+	IL_00d0:  ldfld class BoterKaasEieren.Spel BoterKaasEieren.BkeGui::spel
+	IL_00d5:  call instance class BoterKaasEieren.Speler class BoterKaasEieren.Spel::GetHuidigeSpeler()
+	IL_00da:  stloc.s 5
+	IL_00dc:  ldarg.0 
+	IL_00dd:  ldfld class [System.Windows.Forms]System.Windows.Forms.Label BoterKaasEieren.BkeGui::label
+	IL_00e2:  ldloc.s 5
+	IL_00e4:  call instance string class BoterKaasEieren.Speler::GetNaam()
+	IL_00e9:  ldstr " is aan zet!"
+	IL_00ee:  call string string::Concat(object, object)
+	IL_00f3:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Label::set_Text(string)
+	IL_00f8:  br IL_0160
+
+	IL_00fd:  ldarg 1
+
+	IL_0101:  unbox [mscorlib]System.Int32
+	IL_0106:  ldobj [mscorlib]System.Int32
+	IL_010b:  stloc.s 6
+	IL_010d:  ldloc.s 6
+	IL_010f:  ldc.i4 -1
+	IL_0114:  ceq 
+	IL_0116:  brfalse IL_0130
+
+	IL_011b:  ldarg.0 
+	IL_011c:  ldfld class [System.Windows.Forms]System.Windows.Forms.Label BoterKaasEieren.BkeGui::label
+	IL_0121:  ldstr "Gelijkspel!"
+	IL_0126:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Label::set_Text(string)
+	IL_012b:  br IL_0160
+
+	IL_0130:  ldarg.0 
+	IL_0131:  ldfld class BoterKaasEieren.Spel BoterKaasEieren.BkeGui::spel
+	IL_0136:  call instance class BoterKaasEieren.Speler[] class BoterKaasEieren.Spel::GetSpelers()
+	IL_013b:  ldloc.s 6
+	IL_013d:  ldelem.any BoterKaasEieren.Speler
+	IL_0142:  stloc.s 7
+	IL_0144:  ldarg.0 
+	IL_0145:  ldfld class [System.Windows.Forms]System.Windows.Forms.Label BoterKaasEieren.BkeGui::label
+	IL_014a:  ldloc.s 7
+	IL_014c:  call instance string class BoterKaasEieren.Speler::GetNaam()
+	IL_0151:  ldstr " heeft gewonnen!"
+	IL_0156:  call string string::Concat(object, object)
+	IL_015b:  callvirt instance void class [System.Windows.Forms]System.Windows.Forms.Label::set_Text(string)
+	IL_0160:  ret 
+    } // end of method BkeGui::MessageReceived
+
+    // method line 55
+    .method private hidebysig 
+           instance default void button_Clicked (object sender, class [mscorlib]System.EventArgs e)  cil managed 
+    {
+        // Method begins at RVA 0x3054
+	// Code size 289 (0x121)
+	.maxstack 18
+	.locals init (
+		object	V_0,
+		class BoterKaasEieren.Speler	V_1,
+		class BoterKaasEieren.Speler	V_2,
+		class [mscorlib]System.Threading.Thread	V_3)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s1radio1
+	IL_0007:  call instance bool class [System.Windows.Forms]System.Windows.Forms.RadioButton::get_Checked()
+	IL_000c:  brfalse IL_002a
+
+	IL_0011:  ldstr "Speler 1"
+	IL_0016:  ldsfld class BoterKaasEieren.Mark BoterKaasEieren.Mark::XX
+	IL_001b:  newobj instance void class BoterKaasEieren.MensSpeler::'.ctor'(string, class BoterKaasEieren.Mark)
+	IL_0020:  castclass BoterKaasEieren.Speler
+	IL_0025:  br IL_0071
+
+	IL_002a:  ldarg.0 
+	IL_002b:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s1radio2
+	IL_0030:  call instance bool class [System.Windows.Forms]System.Windows.Forms.RadioButton::get_Checked()
+	IL_0035:  brfalse IL_0058
+
+	IL_003a:  ldstr "Speler 1"
+	IL_003f:  ldsfld class BoterKaasEieren.Mark BoterKaasEieren.Mark::XX
+	IL_0044:  newobj instance void class BoterKaasEieren.DommeStrategie::'.ctor'()
+	IL_0049:  newobj instance void class BoterKaasEieren.ComputerSpeler::'.ctor'(string, class BoterKaasEieren.Mark, class BoterKaasEieren.IStrategie)
+	IL_004e:  castclass BoterKaasEieren.Speler
+	IL_0053:  br IL_0071
+
+	IL_0058:  ldstr "Speler 1"
+	IL_005d:  ldsfld class BoterKaasEieren.Mark BoterKaasEieren.Mark::XX
+	IL_0062:  newobj instance void class BoterKaasEieren.BesteStrategie::'.ctor'()
+	IL_0067:  newobj instance void class BoterKaasEieren.ComputerSpeler::'.ctor'(string, class BoterKaasEieren.Mark, class BoterKaasEieren.IStrategie)
+	IL_006c:  castclass BoterKaasEieren.Speler
+	IL_0071:  stloc.1 
+	IL_0072:  ldarg.0 
+	IL_0073:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s2radio1
+	IL_0078:  call instance bool class [System.Windows.Forms]System.Windows.Forms.RadioButton::get_Checked()
+	IL_007d:  brfalse IL_009b
+
+	IL_0082:  ldstr "Speler 2"
+	IL_0087:  ldsfld class BoterKaasEieren.Mark BoterKaasEieren.Mark::OO
+	IL_008c:  newobj instance void class BoterKaasEieren.MensSpeler::'.ctor'(string, class BoterKaasEieren.Mark)
+	IL_0091:  castclass BoterKaasEieren.Speler
+	IL_0096:  br IL_00e2
+
+	IL_009b:  ldarg.0 
+	IL_009c:  ldfld class [System.Windows.Forms]System.Windows.Forms.RadioButton BoterKaasEieren.BkeGui::s2radio2
+	IL_00a1:  call instance bool class [System.Windows.Forms]System.Windows.Forms.RadioButton::get_Checked()
+	IL_00a6:  brfalse IL_00c9
+
+	IL_00ab:  ldstr "Speler 2"
+	IL_00b0:  ldsfld class BoterKaasEieren.Mark BoterKaasEieren.Mark::OO
+	IL_00b5:  newobj instance void class BoterKaasEieren.DommeStrategie::'.ctor'()
+	IL_00ba:  newobj instance void class BoterKaasEieren.ComputerSpeler::'.ctor'(string, class BoterKaasEieren.Mark, class BoterKaasEieren.IStrategie)
+	IL_00bf:  castclass BoterKaasEieren.Speler
+	IL_00c4:  br IL_00e2
+
+	IL_00c9:  ldstr "Speler 2"
+	IL_00ce:  ldsfld class BoterKaasEieren.Mark BoterKaasEieren.Mark::OO
+	IL_00d3:  newobj instance void class BoterKaasEieren.BesteStrategie::'.ctor'()
+	IL_00d8:  newobj instance void class BoterKaasEieren.ComputerSpeler::'.ctor'(string, class BoterKaasEieren.Mark, class BoterKaasEieren.IStrategie)
+	IL_00dd:  castclass BoterKaasEieren.Speler
+	IL_00e2:  stloc.2 
+	IL_00e3:  ldarg.0 
+	IL_00e4:  ldloc.1 
+	IL_00e5:  ldloc.2 
+	IL_00e6:  newobj instance void class BoterKaasEieren.Spel::'.ctor'(class BoterKaasEieren.Speler, class BoterKaasEieren.Speler)
+	IL_00eb:  stfld class BoterKaasEieren.Spel BoterKaasEieren.BkeGui::spel
+	IL_00f0:  ldarg.0 
+	IL_00f1:  ldfld class BoterKaasEieren.Spel BoterKaasEieren.BkeGui::spel
+	IL_00f6:  ldarg.0 
+	IL_00f7:  call instance void class BoterKaasEieren.Spel::AddObserver(class BoterKaasEieren.IMessageListener)
+	IL_00fc:  ldarg.0 
+	IL_00fd:  ldfld class BoterKaasEieren.Spel BoterKaasEieren.BkeGui::spel
+	IL_0102:  ldftn instance void class BoterKaasEieren.Spel::Play()
+	IL_0108:  newobj instance void class [mscorlib]System.Threading.ThreadStart::'.ctor'(object, native int)
+	IL_010d:  newobj instance void class [mscorlib]System.Threading.Thread::'.ctor'(class [mscorlib]System.Threading.ThreadStart)
+	IL_0112:  stloc.3 
+	IL_0113:  ldloc.3 
+	IL_0114:  ldc.i4.1 
+	IL_0115:  call instance void class [mscorlib]System.Threading.Thread::set_IsBackground(bool)
+	IL_011a:  ldloc.3 
+	IL_011b:  call instance void class [mscorlib]System.Threading.Thread::Start()
+	IL_0120:  ret 
+    } // end of method BkeGui::button_Clicked
+
+    // method line 56
+    .method private hidebysig 
+           instance default void move_Clicked (object sender, class [mscorlib]System.EventArgs e)  cil managed 
+    {
+        // Method begins at RVA 0x3184
+	// Code size 90 (0x5a)
+	.maxstack 13
+	.locals init (
+		object	V_0,
+		class [System.Windows.Forms]System.Windows.Forms.Button	V_1,
+		int32	V_2,
+		class BoterKaasEieren.MensSpeler	V_3)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldfld class BoterKaasEieren.Spel BoterKaasEieren.BkeGui::spel
+	IL_0007:  call instance class BoterKaasEieren.Speler class BoterKaasEieren.Spel::GetHuidigeSpeler()
+	IL_000c:  isinst BoterKaasEieren.MensSpeler
+	IL_0011:  ldnull 
+	IL_0012:  cgt.un 
+	IL_0014:  brfalse IL_0059
+
+	IL_0019:  ldarg 1
+
+	IL_001d:  castclass [System.Windows.Forms]System.Windows.Forms.Button
+	IL_0022:  stloc.1 
+	IL_0023:  ldloc.1 
+	IL_0024:  call instance string class [System.Windows.Forms]System.Windows.Forms.Control::get_Name()
+	IL_0029:  call int32 int32::Parse(string)
+	IL_002e:  stloc.2 
+	IL_002f:  ldarg.0 
+	IL_0030:  ldfld class BoterKaasEieren.Spel BoterKaasEieren.BkeGui::spel
+	IL_0035:  call instance class BoterKaasEieren.Speler class BoterKaasEieren.Spel::GetHuidigeSpeler()
+	IL_003a:  castclass BoterKaasEieren.MensSpeler
+	IL_003f:  stloc.3 
+	IL_0040:  ldloc.3 
+	IL_0041:  call void class [mscorlib]System.Threading.Monitor::Enter(object)
+	IL_0046:  ldloc.3 
+	IL_0047:  ldloc.2 
+	IL_0048:  call instance void class BoterKaasEieren.MensSpeler::SetTempMove(int32)
+	IL_004d:  ldloc.3 
+	IL_004e:  call void class [mscorlib]System.Threading.Monitor::Pulse(object)
+	IL_0053:  ldloc.3 
+	IL_0054:  call void class [mscorlib]System.Threading.Monitor::Exit(object)
+	IL_0059:  ret 
+    } // end of method BkeGui::move_Clicked
+
+  } // end of class BoterKaasEieren.BkeGui
+}
+
+.namespace BoterKaasEieren
+{
+  .class interface public auto ansi abstract IMessageListener
+  	implements [System]System.ComponentModel.ISynchronizeInvoke  {
+
+    // method line 57
+    .method public virtual  hidebysig  newslot  abstract 
+           instance default void MessageReceived (object message)  cil managed 
+    {
+        // Method begins at RVA 0x0
+    } // end of method IMessageListener::MessageReceived
+
+  } // end of class BoterKaasEieren.IMessageListener
+}
+
+.namespace BoterKaasEieren
+{
+  .class public auto ansi BesteStrategie
+  	extends [mscorlib]System.Object
+  	implements BoterKaasEieren.IStrategie  {
+    .field  private  class BoterKaasEieren.Mark dezeSpeler
+    .field  private  class [mscorlib]System.Random random
+
+    // method line 58
+    .method public hidebysig  specialname  rtspecialname 
+           instance default void '.ctor' ()  cil managed 
+    {
+        // Method begins at RVA 0x31ec
+	// Code size 18 (0x12)
+	.maxstack 4
+	.locals init (
+		object	V_0)
+	IL_0000:  ldarg.0 
+	IL_0001:  call instance void object::'.ctor'()
+	IL_0006:  ldarg.0 
+	IL_0007:  newobj instance void class [mscorlib]System.Random::'.ctor'()
+	IL_000c:  stfld class [mscorlib]System.Random BoterKaasEieren.BesteStrategie::random
+	IL_0011:  ret 
+    } // end of method BesteStrategie::.ctor
+
+    // method line 59
+    .method public virtual  hidebysig  newslot 
+           instance default int32 BerekenZet (class BoterKaasEieren.Bord bord, class BoterKaasEieren.Mark mark)  cil managed 
+    {
+        // Method begins at RVA 0x320c
+	// Code size 31 (0x1f)
+	.maxstack 4
+	.locals init (
+		object	V_0)
+	IL_0000:  nop 
+	IL_0001:  ldarg.0 
+	IL_0002:  ldarg 2
+
+	IL_0006:  stfld class BoterKaasEieren.Mark BoterKaasEieren.BesteStrategie::dezeSpeler
+	IL_000b:  ldarg.0 
+	IL_000c:  ldarg 1
+
+	IL_0010:  ldarg 2
+
+	IL_0014:  call instance class BoterKaasEieren.Zet class BoterKaasEieren.BesteStrategie::_berekenZet(class BoterKaasEieren.Bord, class BoterKaasEieren.Mark)
+	IL_0019:  ldfld int32 BoterKaasEieren.Zet::zet
+	IL_001e:  ret 
+    } // end of method BesteStrategie::BerekenZet
+
+    // method line 60
+    .method private hidebysig 
+           instance default class BoterKaasEieren.Zet _berekenZet (class BoterKaasEieren.Bord bord, class BoterKaasEieren.Mark mark)  cil managed 
+    {
+        // Method begins at RVA 0x3238
+	// Code size 387 (0x183)
+	.maxstack 23
+	.locals init (
+		object	V_0,
+		bool	V_1,
+		class BoterKaasEieren.Zet	V_2,
+		int32	V_3,
+		int32	V_4,
+		int32	V_5,
+		class BoterKaasEieren.Zet	V_6)
+	IL_0000:  nop 
+	IL_0001:  ldc.i4.1 
+	IL_0002:  stloc.1 
+	IL_0003:  ldnull 
+	IL_0004:  stloc.2 
+	IL_0005:  ldc.i4 0
+	IL_000a:  stloc.3 
+	IL_000b:  ldarg.0 
+	IL_000c:  ldfld class [mscorlib]System.Random BoterKaasEieren.BesteStrategie::random
+	IL_0011:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_0016:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_001b:  mul 
+	IL_001c:  callvirt instance int32 class [mscorlib]System.Random::Next(int32)
+	IL_0021:  stloc.s 4
+	IL_0023:  ldloc.3 
+	IL_0024:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_0029:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_002e:  mul 
+	IL_002f:  clt 
+	IL_0031:  brfalse IL_003c
+
+	IL_0036:  ldloc.1 
+	IL_0037:  br IL_003d
+
+	IL_003c:  ldc.i4.0 
+	IL_003d:  brfalse IL_0181
+
+	IL_0042:  ldloc.3 
+	IL_0043:  ldloc.s 4
+	IL_0045:  add 
+	IL_0046:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_004b:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_0050:  mul 
+	IL_0051:  rem 
+	IL_0052:  stloc.s 5
+	IL_0054:  ldarg 1
+
+	IL_0058:  ldloc.s 5
+	IL_005a:  call instance bool class BoterKaasEieren.Bord::IsLeegVakje(int32)
+	IL_005f:  brfalse IL_0174
+
+	IL_0064:  newobj instance void class BoterKaasEieren.Zet::'.ctor'()
+	IL_0069:  stloc.s 6
+	IL_006b:  ldloc.s 6
+	IL_006d:  ldloc.s 5
+	IL_006f:  stfld int32 BoterKaasEieren.Zet::zet
+	IL_0074:  ldarg 1
+
+	IL_0078:  ldloc.s 5
+	IL_007a:  ldarg 2
+
+	IL_007e:  call instance void class BoterKaasEieren.Bord::SetVakje(int32, class BoterKaasEieren.Mark)
+	IL_0083:  ldarg 1
+
+	IL_0087:  call instance bool class BoterKaasEieren.Bord::GameOver()
+	IL_008c:  brfalse IL_00ff
+
+	IL_0091:  ldarg 1
+
+	IL_0095:  ldarg 2
+
+	IL_0099:  call instance bool class BoterKaasEieren.Bord::HeeftGewonnen(class BoterKaasEieren.Mark)
+	IL_009e:  brfalse IL_00d2
+
+	IL_00a3:  ldc.i4.0 
+	IL_00a4:  stloc.1 
+	IL_00a5:  ldloc.s 6
+	IL_00a7:  ldc.i4 1
+	IL_00ac:  box [mscorlib]System.Int32
+	IL_00b1:  stloc.0 
+	IL_00b2:  ldloc.0 
+	IL_00b3:  unbox [mscorlib]System.Int32
+	IL_00b8:  ldobj [mscorlib]System.Int32
+	IL_00bd:  stfld int32 BoterKaasEieren.Zet::waarde
+	IL_00c2:  ldloc.0 
+	IL_00c3:  unbox [mscorlib]System.Int32
+	IL_00c8:  ldobj [mscorlib]System.Int32
+	IL_00cd:  br IL_00fa
+
+	IL_00d2:  ldloc.s 6
+	IL_00d4:  ldc.i4 0
+	IL_00d9:  box [mscorlib]System.Int32
+	IL_00de:  stloc.0 
+	IL_00df:  ldloc.0 
+	IL_00e0:  unbox [mscorlib]System.Int32
+	IL_00e5:  ldobj [mscorlib]System.Int32
+	IL_00ea:  stfld int32 BoterKaasEieren.Zet::waarde
+	IL_00ef:  ldloc.0 
+	IL_00f0:  unbox [mscorlib]System.Int32
+	IL_00f5:  ldobj [mscorlib]System.Int32
+	IL_00fa:  br IL_013b
+
+	IL_00ff:  ldloc.s 6
+	IL_0101:  ldarg.0 
+	IL_0102:  ldarg 1
+
+	IL_0106:  ldarg 2
+
+	IL_010a:  call instance class BoterKaasEieren.Mark class BoterKaasEieren.Mark::Other()
+	IL_010f:  call instance class BoterKaasEieren.Zet class BoterKaasEieren.BesteStrategie::_berekenZet(class BoterKaasEieren.Bord, class BoterKaasEieren.Mark)
+	IL_0114:  ldfld int32 BoterKaasEieren.Zet::waarde
+	IL_0119:  neg 
+	IL_011a:  box [mscorlib]System.Int32
+	IL_011f:  stloc.0 
+	IL_0120:  ldloc.0 
+	IL_0121:  unbox [mscorlib]System.Int32
+	IL_0126:  ldobj [mscorlib]System.Int32
+	IL_012b:  stfld int32 BoterKaasEieren.Zet::waarde
+	IL_0130:  ldloc.0 
+	IL_0131:  unbox [mscorlib]System.Int32
+	IL_0136:  ldobj [mscorlib]System.Int32
+	IL_013b:  pop 
+	IL_013c:  ldloc.2 
+	IL_013d:  ldnull 
+	IL_013e:  ceq 
+	IL_0140:  brtrue IL_0159
+
+	IL_0145:  ldloc.s 6
+	IL_0147:  ldfld int32 BoterKaasEieren.Zet::waarde
+	IL_014c:  ldloc.2 
+	IL_014d:  ldfld int32 BoterKaasEieren.Zet::waarde
+	IL_0152:  cgt 
+	IL_0154:  br IL_015a
+
+	IL_0159:  ldc.i4.1 
+	IL_015a:  brfalse IL_0164
+
+	IL_015f:  ldloc.s 6
+	IL_0161:  stloc.2 
+	IL_0162:  ldloc.2 
+	IL_0163:  pop 
+	IL_0164:  ldarg 1
+
+	IL_0168:  ldloc.s 5
+	IL_016a:  ldsfld class BoterKaasEieren.Mark BoterKaasEieren.Mark::EMPTY
+	IL_016f:  call instance void class BoterKaasEieren.Bord::SetVakje(int32, class BoterKaasEieren.Mark)
+	IL_0174:  ldloc.3 
+	IL_0175:  ldc.i4 1
+	IL_017a:  add 
+	IL_017b:  stloc.3 
+	IL_017c:  br IL_0023
+
+	IL_0181:  ldloc.2 
+	IL_0182:  ret 
+    } // end of method BesteStrategie::_berekenZet
+
+  } // end of class BoterKaasEieren.BesteStrategie
+}
+
+.namespace BoterKaasEieren
+{
+  .class public auto ansi Zet
+  	extends [mscorlib]System.Object
+  {
+    .field  public  int32 zet
+    .field  public  int32 waarde
+
+    // method line 61
+    .method public hidebysig  specialname  rtspecialname 
+           instance default void '.ctor' ()  cil managed 
+    {
+        // Method begins at RVA 0x33c8
+	// Code size 7 (0x7)
+	.maxstack 8
+	IL_0000:  ldarg.0 
+	IL_0001:  call instance void object::'.ctor'()
+	IL_0006:  ret 
+    } // end of method Zet::.ctor
+
+  } // end of class BoterKaasEieren.Zet
+}
+
+.namespace BoterKaasEieren
+{
+  .class public auto ansi DommeStrategie
+  	extends [mscorlib]System.Object
+  	implements BoterKaasEieren.IStrategie  {
+    .field  private  class [mscorlib]System.Random random
+
+    // method line 62
+    .method public hidebysig  specialname  rtspecialname 
+           instance default void '.ctor' ()  cil managed 
+    {
+        // Method begins at RVA 0x33d0
+	// Code size 18 (0x12)
+	.maxstack 4
+	.locals init (
+		object	V_0)
+	IL_0000:  ldarg.0 
+	IL_0001:  call instance void object::'.ctor'()
+	IL_0006:  ldarg.0 
+	IL_0007:  newobj instance void class [mscorlib]System.Random::'.ctor'()
+	IL_000c:  stfld class [mscorlib]System.Random BoterKaasEieren.DommeStrategie::random
+	IL_0011:  ret 
+    } // end of method DommeStrategie::.ctor
+
+    // method line 63
+    .method public virtual  hidebysig  newslot 
+           instance default int32 BerekenZet (class BoterKaasEieren.Bord bord, class BoterKaasEieren.Mark mark)  cil managed 
+    {
+        // Method begins at RVA 0x33f0
+	// Code size 112 (0x70)
+	.maxstack 12
+	.locals init (
+		object	V_0,
+		class [mscorlib]System.Collections.ArrayList	V_1,
+		int32	V_2)
+	IL_0000:  nop 
+	IL_0001:  newobj instance void class [mscorlib]System.Collections.ArrayList::'.ctor'()
+	IL_0006:  stloc.1 
+	IL_0007:  ldc.i4 0
+	IL_000c:  stloc.2 
+	IL_000d:  ldloc.2 
+	IL_000e:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_0013:  ldsfld int32 BoterKaasEieren.Bord::DIM
+	IL_0018:  mul 
+	IL_0019:  clt 
+	IL_001b:  brfalse IL_0049
+
+	IL_0020:  ldarg 1
+
+	IL_0024:  ldloc.2 
+	IL_0025:  call instance bool class BoterKaasEieren.Bord::IsLeegVakje(int32)
+	IL_002a:  brfalse IL_003c
+
+	IL_002f:  ldloc.1 
+	IL_0030:  ldloc.2 
+	IL_0031:  box [mscorlib]System.Int32
+	IL_0036:  callvirt instance int32 class [mscorlib]System.Collections.ArrayList::Add(object)
+	IL_003b:  pop 
+	IL_003c:  ldloc.2 
+	IL_003d:  ldc.i4 1
+	IL_0042:  add 
+	IL_0043:  stloc.2 
+	IL_0044:  br IL_000d
+
+	IL_0049:  ldloc.1 
+	IL_004a:  ldarg.0 
+	IL_004b:  ldfld class [mscorlib]System.Random BoterKaasEieren.DommeStrategie::random
+	IL_0050:  ldc.i4 0
+	IL_0055:  ldloc.1 
+	IL_0056:  callvirt instance int32 class [mscorlib]System.Collections.ArrayList::get_Count()
+	IL_005b:  callvirt instance int32 class [mscorlib]System.Random::Next(int32, int32)
+	IL_0060:  callvirt instance object class [mscorlib]System.Collections.ArrayList::get_Item(int32)
+	IL_0065:  unbox [mscorlib]System.Int32
+	IL_006a:  ldobj [mscorlib]System.Int32
+	IL_006f:  ret 
+    } // end of method DommeStrategie::BerekenZet
+
+  } // end of class BoterKaasEieren.DommeStrategie
+}
+\end{lstlisting}
+
+\subsection{Gebruiksaanwijzing}
+Aangezien \textit{Boter, Kaas en Eieren} een \textit{GUI} applicatie is valt er niet te spreken over gewone invoer en uitvoer. De applicatie is immers te bedienen met de muis. Om toch een beeld te geven van de werking van de applicatie en hoe de correctheid hiervan getest kan worden is er een korte gebruiksaanwijzing opgesteld.
+
+Nadat de applicatie is opgestart kan voor beide spelers gekozen worden of hier een mens, een domme \textit{AI} of een slimme \textit{AI} speelt. Als deze keuze volledig is ingevuld kan een spel gestart worden met de start knop. Vervolgens kunnen de spelers om en om hun zet doen, totdat het spel afgelopen is. Een nieuw spel kan wederom gestart worden op dezelfde manier.

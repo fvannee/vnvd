@@ -1,0 +1,30 @@
+import System;
+import System.Threading;
+
+namespace BoterKaasEieren
+{
+   class public ComputerSpeler extends Speler
+   {
+      private IStrategie strategie;
+      
+      public ComputerSpeler(String naam, Mark mark, IStrategie strategie) : base(naam, mark)
+      {
+         this::strategie = strategie;
+      }
+      
+      public override Int32 BepaalZet(Bord bord)
+      {
+         this::strategie::BerekenZet(bord, this::GetMark());
+      }
+      
+      public IStrategie GetStrategie()
+      {
+         this::strategie;
+      }
+      
+      public void SetStrategie(IStrategie strategie)
+      {
+         this::strategie = strategie;
+      }
+   }
+}

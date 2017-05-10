@@ -1,0 +1,75 @@
+import System;
+import System.Collections;
+import System.Drawing;
+import System.Timers;
+import System.Windows.Forms;
+import System.ComponentModel;
+
+namespace BoterKaasEieren
+{
+	class public BesteStrategie implements IStrategie
+	{
+	   private Mark dezeSpeler;
+	   private Random random;
+	   
+	   public BesteStrategie()
+	   {
+	      this::random = new Random();
+	   }
+	   
+	   public Int32 BerekenZet(Bord bord, Mark mark)
+	   {
+	      this::dezeSpeler = mark;
+	      this::_berekenZet(bord, mark)::zet;
+	   }
+	   
+	   private Zet _berekenZet(Bord bord, Mark mark)
+	   {
+	      Boolean cont = true;
+	      Zet besteZet = null;
+	      Int32 count = 0;
+	      Int32 offset = this::random::Next(Bord::DIM * Bord::DIM);
+	      while (count < Bord::DIM * Bord::DIM && cont;)
+	      {
+	         Int32 i = (count + offset) % (Bord::DIM * Bord::DIM);
+	         if (bord::IsLeegVakje(i);) then
+	         {
+	            Zet zet = new Zet();
+	            zet::zet = i;
+	            
+	            bord::SetVakje(i, mark);
+	            if (bord::GameOver();) then
+	            {
+	               if (bord::HeeftGewonnen(mark);) then
+	               {
+	                  cont = false;
+	                  zet::waarde = 1;
+	               }
+	               else
+	               {
+	                  zet::waarde = 0;
+	               } ;
+	            }
+	            else
+	            {
+	               zet::waarde = -this::_berekenZet(bord, mark::Other())::waarde;
+	            } ;
+	            
+	            if (besteZet == null || zet::waarde > besteZet::waarde;) then
+	            {
+	               besteZet = zet;
+	            } ;
+	            bord::SetVakje(i, Mark::EMPTY);
+	         } ;
+	         count = count + 1;
+	      };
+	      besteZet;
+	   }
+	}
+
+   class public Zet
+   {      
+      public Int32 zet;
+      public Int32 waarde;
+   }
+}

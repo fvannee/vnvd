@@ -1,0 +1,296 @@
+\section{Vertaalregels}
+In dit hoofdstuk zullen de vertaalregels van VNVD worden besproken. VNVD bestaat uit het object georienteerde gedeelte voor de structuur van een programma en het uitvoerbare gedeelte, de werkelijke opcodes. Voor de vertaalregels zal alleen het uitvoerbare gedeelte in acht worden genomen, omdat er voor de structuur van het programma geen goede vertaalregels zijn op te stellen. We onderscheiden dus alleen de code functies op het niveau van methodes en lager. Verder zijn sommige vertaalregels op een hoger abstractieniveau dan de eigenlijke gegenereerde code. Dit, omdat de regels anders te groot en minder begrijpelijk zouden worden.
+
+Code functies in VNVD:
+
+\begin{tabular} { | l | c | p{6cm} | }
+\hline
+Methode & run M & Draait de methode P, beginnend met een lege stack en eindigend met ofwel een lege stack of het resultaat van de methode op de stack. \\ \hline
+Expressie & evaluate E & Evalueert de expressie E. Omdat VNVD een expressietaal is, valt vrijwel alles onder deze code functie. \\ \hline
+Declaratie & elaborate D & Declareer een variabele in de huidige scope. \\ \hline
+\end{tabular}
+
+\subsection{Methode}
+Een methode M bestaat uit een expressie die uitgevoerd wordt. We kunnen dus concluderen dat het draaien van het methode als het volgende gezien kan worden.
+\begin{lstlisting}
+run[E] =
+	evaluate E
+	ret
+\end{lstlisting}
+
+\subsection{Expressie}
+\subsubsection{Ternary expressie}
+\begin{lstlisting}
+evaluate[if E1 then E2 else E3 fi] =
+	evaluate E1
+	brfalse g
+	evaluate E2
+	br h
+g:	evaluate E3
+h:
+\end{lstlisting}
+Zoals hierboven beschreven zal een ternary expressie als eerste E1 evalueren. Deze levert een boolean waarde op. Als deze false is wordt een branch gedaan naar E3, anders wordt E2 ge\"evalueerd. Dan zal na E2 worden gebranched naar het einde van de expressie.
+
+\subsubsection{While}
+\begin{lstlisting}
+evaluate[while E1 E2] =
+g:	evaluate E1
+	brfalse h
+	evaluate E2
+	br g
+h:
+\end{lstlisting}
+De while wordt net zolang uitgevoerd totdat E1 false oplevert. Dat is hierboven ook te zien. E1 wordt eerst ge\"evalueerd, waarna er naar het einde van de expressie wordt gesprongen als E1 false is. Als E1 true is wordt E2 uitgevoerd en wordt daarna weer gebranched naar E1.
+
+\subsubsection{Foreach}
+\begin{lstlisting}
+evaluate[for D in E1 E2] =
+	elaborate D
+	evaluate E1
+	callvirt IEnumerator IEnumerable.GetEnumerator()
+g:	dup
+	callvirt Boolean IEnumerator.MoveNext()
+	brfalse h
+	dup
+	callvirt Object IEnumerator.get_Current()
+	castclass typeof(D)
+	stloc D
+	evaluate E2
+	br g
+h:	pop
+\end{lstlisting}
+Foreach loopt over alle elementen van een IEnumerable object heen. E1 zal een object opleveren dat IEnumerable is. Hier wordt de IEnumerator van verkregen, waarna net zolang MoveNext() hierop zal worden aangeroepen gevolgd door het evalueren van E2, totdat MoveNext() false oplevert. Dan wordt er naar het einde van de loop gesprongen en een laatste pop uitgevoerd om de instantie van IEnumerator van de stack te halen.
+
+\subsubsection{Invocatie}
+\begin{lstlisting}
+evaluate[E1 :: I ( E2 .. En )] =
+	evaluate[E1]
+	evaluate[E2]
+	...
+	evaluate[En]
+	call typeof(E1)::I
+\end{lstlisting}
+Deze vorm van invocatie wordt gebruikt wanneer de methode die aangeroepen wordt niet virtual is of wanneer expliciet, met het keyword \textit{base}, een methode uit de base class wordt aangeroepen. Eerst wordt E1 ge\"evalueerd. Deze levert een instantie van een klasse op waarop de methode zal worden aangeroepen. Daarna worden de meegegeven argumenten, E2..En, ge\"evalueerd. Als dit is gebeurd wordt de methode zelf aangeroepen. Het kiezen welke methode exact aangeroepen moet worden gebeurd op basis van de meegegeven argumenten. Er is overloading mogelijk.
+
+\begin{lstlisting}
+evaluate[E1 :: I ( E2 .. En )] =
+	evaluate[E1]
+	evaluate[E2]
+	...
+	evaluate[En]
+	callvirt typeof(E1)::I	I is virtual en geen call naar base class
+\end{lstlisting}
+Wanneer een methode is gemarkeerd als virtual wordt in plaats van call een callvirt instructie gebruikt. Verder is deze hetzelfde als de eerder beschreven invocatie.
+
+\subsubsection{Object creatie}
+\begin{lstlisting}
+evaluate[new I ( E1 .. En )] =
+	evaluate[E1]
+	...
+	evaluate[En]
+	newobj typeof(I)::.ctor
+\end{lstlisting}
+Voor het instanti\"eren van objecten wordt dit gebruikt. Eerst worden de meegegeven argumenten E1..En ge\"evalueerd. Daarna wordt de instructie newobj gegeven die de instantie construeert.
+
+\subsubsection{Assignment}
+\begin{lstlisting}
+evaluate[I = E1] =
+	evaluate E1
+	stloc I
+\end{lstlisting}
+In dit geval wordt de waarde van expressie E1 toegekend aan de identifier I. De instructie stloc wordt gebruikt als I wijst naar een lokale variabele.
+
+\begin{lstlisting}
+evaluate[I = E1] =
+	evaluate E1
+	starg I	I is methode argument
+\end{lstlisting}
+Idem aan bovengenoemde, behalve dat in dit geval een waarde aan een methode argument wordt toegekend.
+
+\begin{lstlisting}
+evaluate[E1 :: I = E2] =
+	evaluate E1
+	evaluate E2
+	stfld typeof(E1)::I
+\end{lstlisting}
+Wanneer een waarde aan een field wordt toegekend wordt de instructie stfld gebruikt. Eerst wordt E1 ge\"evalueerd die de waarde van de instantie van een klasse op de stack achterlaat. Daarna wordt E2 ge\"evalueerd en als laatste wordt stfld aangeroepen.
+
+\begin{lstlisting}
+evaluate[E1 [ E2 ] = E3] =
+	evaluate E1
+	evaluate E2
+	evaluate E3
+	stelem typeof(E1)
+\end{lstlisting}
+In dit geval wordt een element van een array op een bepaalde waarde gezet. Hiertoe moet de eerste waarde op de stack de array zelf zijn, E1, de tweede moet de index zijn van het element in de array, in dit geval E2, en de derde de waarde die toegekend wordt. Daarna wordt de instructie E1 uitgevoerd om de waarde in de array te zetten.
+
+\subsubsection{Array creatie}
+\begin{lstlisting}
+evaluate[new I [ E1 ]] =
+	evaluate E1
+	newarr typeof(I)
+\end{lstlisting}
+Het maken van een array gebeurt door eerst de grootte van de array op de stack te zetten door E1 te evalueren. E1 laat een integer achter. Vervolgens wordt newarr uitgevoerd.
+
+\subsubsection{Array index}
+\begin{lstlisting}
+evaluate[E1 [ E2 ]] =
+	evaluate E1
+	evaluate E2
+	ldelem typeof(E1)
+\end{lstlisting}
+Om een element uit een array te verkrijgen moet eerst de array op de stack staan, daarna de index uit de array en vervolgens moet ldelem worden uitgevoerd. In dit geval zorgt E1 voor de array en E2 voor de integer van de index.
+
+\subsubsection{Overloadable binary operators}
+\begin{lstlisting}
+evaluate[E1 O E2] =
+	evaluate E1
+	evaluate E2
+	O
+\end{lstlisting}
+In dit geval stelt O de operator voor die toegepast wordt. E1 en E2 zijn van hetzelfde type en bovendien een primitive type. De operator kan bijvoorbeeld vermenigvuldigen zijn, \textit{mult}, of logic or, \textit{or}.
+
+\begin{lstlisting}
+evaluate[E1 O E2] =
+	evaluate E1
+	evaluate E2
+	call <T> typeof(E1)::op_O(typeof(E1), typeof(E2))
+\end{lstlisting}
+Als de types van E1 en E2 niet primitive zijn, maar zij wel operator overloading hebben ge\"implementeerd wordt dit toegepast. De methode wordt aangeroepen van de betreffende operator.
+
+\subsubsection{Overloadable unary operators}
+\begin{lstlisting}
+evaluate[O E1] =
+	evaluate E1
+	O
+\end{lstlisting}
+
+\begin{lstlisting}
+evaluate[O E1] =
+	evaluate E1
+	call <T> typeof(E1)::op_O(typeof(E1))
+\end{lstlisting}
+Hier geldt bijna hetzelfde als voor de binary operators. Het verschil is dat nu maar \'e\'en expressie wordt ge\"evalueerd waarna de operator wordt aangeroepen. Ook deze kan overloaded zijn.
+
+\subsubsection{Conditional and}
+\begin{lstlisting}
+evaluate[E1 && E2] =
+	evaluate E1
+	brfalse g
+	evaluate E2
+	br h
+g:	ldc.i.0
+h:
+\end{lstlisting}
+Deze operator kan niet overloaded worden, en wordt bovendien lazy ge\"evalueerd. Eerst wordt E1 berekend, als deze false is kan de waarde van de hele expressie nooit meer true worden, dus wordt gelijk naar het einde gesprongen. Anders wordt E2 ge\"evalueerd en wordt naar het einde gesprongen.
+
+\subsubsection{Conditional or}
+\begin{lstlisting}
+evaluate[E1 || E2] =
+	evaluate E1
+	brtrue g
+	evaluate E2
+	br h
+g:	ldc.i.1
+h:
+\end{lstlisting}
+Hier geldt hetzelfde als voor de conditional and, met het verschil dat wanneer E1 true oplevert de expressie E1 || E2 altijd true zal zijn, en dus E2 niet meer ge\"evalueerd hoeft te worden.
+
+\subsubsection{Variabele gebruikt}
+\begin{lstlisting}
+evaluate[I] =
+	ldarg.I
+\end{lstlisting}
+Deze code template is voor het laden van een methode argument. Hiervoor wordt ldarg gebruikt.
+
+\begin{lstlisting}
+evaluate[I] =
+	ldloc.I
+\end{lstlisting}
+Voor het laden van een lokale variabele wordt de instructie ldloc gebruikt.
+
+\subsubsection{Literals}
+\begin{lstlisting}
+evaluate[L] =
+	ldstr L
+\end{lstlisting}
+
+\begin{lstlisting}
+evaluate[L] =
+	ldc.i4 L
+\end{lstlisting}
+Hier staan twee voorbeelden gegeven voor het gebruik van literals. In de bovenste code template wordt een literal string geladen met de instructie \textit{ldstr}. In die daaronder wordt een integer geladen met \textit{ldc.i4}. Andere instructies om literals te laden zijn: \textit{ldc.i8} voor een long, \textit{ldc.r4} voor een float, \textit{ldc.r8} voor een double en \textit{ldc.i4} voor een char.
+
+\subsubsection{Casting}
+\begin{lstlisting}
+evaluate[ ( I ) E1 ] =
+	evaluate E1
+	castclass I
+\end{lstlisting}
+Een directe cast gebruikt de instructie \textit{castclass}. Het effect hiervan is dat het type van E1 veranderd wordt naar het type van I. Wanneer het casten niet mogelijk is wordt een exceptie gegooid.
+
+\begin{lstlisting}
+evaluate[E1 as I] =
+	evaluate E1
+	isinst I
+\end{lstlisting}
+Het verschil met bovenstaande cast is dat deze geen exceptie gooit wanneer het casten niet mogelijk is. Hiervoor wordt dan ook een andere instructie gebruikt, namelijk \textit{isinst}.
+
+\begin{lstlisting}
+evaluate[E1 is I] =
+	evaluate E1
+	isinst I
+	ldnull
+	cgt_un
+\end{lstlisting}
+Deze expressie bekijkt of een E1 van een bepaald type is. Hiertoe wordt eerst \textit{isinst} uitgevoerd, waarna de uitkomst hiervan wordt vergeleken met null.
+
+\subsubsection{Read}
+\begin{lstlisting}
+evaluate[read(I)] =
+	call ConsoleKeyInfo Console::ReadKey()
+	call Char ConsoleKeyInfo::get_KeyChar()
+	stloc I
+	ldloc I
+\end{lstlisting}
+Bovenstaande read expressie wordt gebruikt voor het inlezen van een character van de standaardinvoer. Omdat er maar \'e\'en wordt ingelezen, moet de expressie de waarde weer achterlaten op de stack. Hier zorgt de laatste \textit{ldloc} voor.
+
+Het inlezen van een string of een integer gebeurt op ongeveer dezelfde manier. Het verschil is dat voor een string de methode \textit{Console::ReadLine()} wordt aangeroepen, en voor een integer de methode \textit{Console::ReadLine()} gevolgd door \textit{Int32::Parse(String)}.
+
+\begin{lstlisting}
+evaluate[read(I1 .. In)] =
+	call ConsoleKeyInfo Console::ReadKey()
+	call Char ConsoleKeyInfo::get_KeyChar()
+	stloc I1
+	...
+	call ConsoleKeyInfo Console::ReadKey()
+	call Char ConsoleKeyInfo::get_KeyChar()
+	stloc In
+\end{lstlisting}
+Bij het inlezen van meerdere variabelen worden deze opgesplitst in meerdere aanroepen. De \textit{ldloc} wordt weggelaten omdat het type van deze expressie \textit{void} is. Ook hier zijn weer verschillende versies voor voor het inlezen van meerdere strings en integers.
+
+\subsubsection{Write}
+\begin{lstlisting}
+evaluate[write(E1)] =
+	evaluate E1
+	dup
+	call Void Console::Write(Object)
+\end{lstlisting}
+Bij het schrijven naar de standaarduitvoer zal eerst E1 worden ge\"evalueerd. Daarna zal de instructie \textit{dup} worden uitgevoerd, omdat de expressie een waarde moet achterlaten op de stack. Als laatste wordt \textit{Console::Write(Object)} aangeroepen die de expressie naar de standaarduitvoer schrijft.
+
+\begin{lstlisting}
+evaluate[write(E1 .. En)] =
+	evaluate E1
+	call Void Console::Write(Object)
+	...
+	evaluate En
+	call Void Console::Write(Object)
+\end{lstlisting}
+Bij het schrijven van meerdere expressies naar de standaard uitvoer wordt de instructie \textit{dup} weggelaten. Verder is deze identiek aan bovenstaande, behalve dat \textit{Console::Write(Object)} voor elke expressie wordt aangeroepen.
+
+\subsection{Declaratie}
+\subsubsection{Lokale variabele}
+Het declareren van een lokale variabele levert niet gelijk instructies op die uitgevoerd worden. Het effect van de declaratie is dat het type gebind wordt aan de identifier en dat in de sectie locals van de methode een variabele gedeclareerd wordt.
+
+\subsubsection{Lokale constante}
+Het enige effect van een lokale constante is dat de compiler de waarde ervan gelijk opslaat in de checkerfase. In de generator fase wordt bij elke keer dat deze gebruikt wordt direct de waarde weggeschreven in plaats van dat er geheugen wordt vrijgemaakt om de waarde in op te slaan.

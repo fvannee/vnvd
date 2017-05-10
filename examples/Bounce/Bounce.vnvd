@@ -1,0 +1,133 @@
+import System;
+import System.Drawing;
+import System.Collections;
+import System.ComponentModel;
+import System.Windows.Forms;
+import System.Data;
+import System.Timers;
+import DebugLib;
+
+namespace BouncingBall
+{
+	class public BounceApplication
+	{
+		public static BounceForm bounceForm;
+		
+		public static void Main()
+		{
+			BounceApplication::bounceForm = new BounceForm();
+			Application::Run(BounceApplication::bounceForm);
+		}
+	}
+
+	class public BounceForm extends System.Windows.Forms.Form
+	{
+		private Int32 x;
+		private Int32 y;
+		private Int32 counter;
+		private Int32 yDir;
+		private Int32 xDir;
+		private System.ComponentModel.Container components;
+		
+		public BounceForm()
+		{
+			this::x = 0;
+			this::y = 0;
+			this::counter = 0;
+			this::yDir = 1;
+			this::xDir = 1;
+			
+			this::InitializeComponent();
+		}
+
+		protected override void Dispose( Boolean disposing )
+		{
+			if ( disposing; ) then
+			{
+				if (this::components != null;) then
+				{
+					this::components::Dispose();
+				} ;
+			} ;
+			
+			base::Dispose( disposing );
+		}
+
+		private void InitializeComponent()
+		{
+			this::SetStyle(ControlStyles::UserPaint, true);
+			this::SetStyle(ControlStyles::AllPaintingInWmPaint, true);
+			this::SetStyle(ControlStyles::DoubleBuffer, true);
+
+			this::set_ClientSize(new Size(400, 300));
+			this::set_Size(new Size(400, 300));
+			this::set_Name("Bouncing Ball");
+			this::set_Text("Bouncing Ball");
+			this::Load += new System.EventHandler(this::BounceForm_Load);
+		}
+
+		protected override void OnPaint(PaintEventArgs pe)
+		{
+			Graphics g = pe::get_Graphics();
+			Pen blackPen = new Pen(Color::get_Black(), (Single)2.0);
+			SolidBrush redBrush = new SolidBrush(Color::get_Red());
+
+			g::DrawEllipse(blackPen, this::x, this::y, 30, 30);
+			g::FillEllipse(redBrush, this::x, this::y, 30, 30);
+			this::Invalidate();
+		}
+
+		public void bounceTheBall()
+		{
+			if ((this::y + 30) >= this::get_ClientSize()::get_Height();) then
+			{
+				DebugPrinter::PrintMessage("Collission detected on the right edge of the screen!");
+				this::yDir = -1;
+			}
+			else if ((this::y) <= 0;) then
+			{
+				DebugPrinter::PrintMessage("Collission detected on the left edge of the screen!");
+				this::yDir = 1;
+			}  ;
+			
+			if ((this::x + 30) >= this::get_ClientSize()::get_Width();) then
+			{
+				DebugPrinter::PrintMessage("Collission detected on the bottom edge of the screen!");
+				this::xDir = -1;
+			}
+			else if ((this::x) <= 0;) then
+			{
+				DebugPrinter::PrintMessage("Collission detected on the upper edge of the screen!");
+				this::xDir = 1;
+			}  ;
+			
+			this::y = this::y + this::yDir;
+			this::x = this::x + this::xDir;
+
+			this::Invalidate();
+		}
+
+		private void BounceForm_Load(Object sender, System.EventArgs e)
+		{
+			BounceTimer bT = new BounceTimer();
+		}
+
+	}
+
+	class public BounceTimer extends System.Windows.Forms.Control
+	{
+		public BounceTimer()
+		{
+			System.Timers.Timer rotateTimer = new System.Timers.Timer();
+			rotateTimer::Elapsed += new ElapsedEventHandler(this::BounceTimer_Tick);
+
+			rotateTimer::set_Interval(10.0);
+			rotateTimer::set_Enabled(true);
+		}
+		
+		private void BounceTimer_Tick(Object Sender, System.Timers.ElapsedEventArgs e)
+		{
+			BounceApplication::bounceForm::bounceTheBall();
+		}
+	}
+}

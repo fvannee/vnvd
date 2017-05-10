@@ -1,0 +1,26 @@
+\section{Beschrijving}
+De programmeertaal VNVD, de Van Nee-Verberkt-Duijvestijn taal, is een objectgeorienteerde taal in de stijl van C\# en C++. Echter, het grote verschil met die talen is dat zij ook statements bevatten; VNVD kent louter expressies. Alles laat een waarde achter op de stack. Er is vrij exact vastgehouden aan de \emph{Basic Expression Language}, beschreven in het dictaat. Hiernaast kent VNVD nog een groot aantal features, die gezamenlijk de taal \textit{bijna} net zo krachtig maken als C\# of C++.
+
+VNVD is volledig compatibel met bestaande .NET framework klassen. Daardoor kan alle functionaliteit die in dit framework zit, of door anderen aan libraries voor dit framework is gemaakt, direct in VNVD worden gebruikt. %% Voor GUI applicaties is het in VNVD bijvoorbeeld mogelijk de gemakkelijke C\# toolkit te gebruiken. %%
+
+Als een volledig object geori\"enteerde taal kent VNVD ook een grote hoeveelheid concepten uit de object geori\"enteerde theorie. Zo kent de taal namespaces, waardoor code makkelijk te structureren is. Externe namespaces kunnen ook op bestands niveau ge\"importeerd worden om gebruikt te worden.
+
+Logischer wijs kent de taal klassen, maar ook interfaces en abstracte klassen. Voor klassen kent zij single inheritance en voor interfaces (en abstrace klassen) gewone inheritance. Klassen kunnen methoden, velden en events herbergen. Overigens kunnen deze elementen natuurlijk ook statisch gedefini\"eerd worden.
+
+In VNVD is het ook mogelijk enumeraties te defini\"eren. Binnen VNVD vallen deze onder de object geori\"enteerde beleving.
+
+Zo als in elke echte programmeer taal bezit VNVD ook een aantal belangrijke conditionele constructies. Een if else constructie (ofwel de ternary), een while loop en zelfs een for each loop zitten standaard in de taal. De laatst genoemde maakt het mogelijk om over een enumereerbaar object te itereren. %%Een gewone for loop kent de taal niet, om de simpele reden dat dit een soort while loop is. Een for loop is dus als een while loop te implementeren.%%
+
+De taal kent een try catch finally constructie voor foutafhandeling. Het is in VNVD mogelijk excepties te genereren en naar behoeft met deze constructie weer af te vangen en af te handelen. Zoals de overige onderdelen van de taal, is ook het foutafhandelingssysteem volledig compatibel met .NET.
+
+Alle objecten en overige waarden kunnen worden opgeslagen in variabelen. VNVD kent naast gewone variabelen ook arraytypen. Elk willekeurig type kan ook als arraytype gebruikt worden. Net zoals gewone variabelen kunnen arrays ook bij de declaratie direct gevuld (gedenoteerd) worden.
+
+Alle variabele typen in VNVD zijn ook constant te gebruiken. Constanten worden direct door de compiler afgehandeld en in de gegenereerde code vervangen. Daardoor kunnen constanten enkel van primitieve typen zijn.
+
+Tot slot kent VNVD, als expressie taal, natuurlijk een breed scala aan expressies. Naast de verwachte binaire operatoren, unaire operatoren, arithmetische operatoren en vergelijkings operatoren kent VNVD ook uitgebreidere operatoren. Zoals de eerder genoemde ternary en assignment expressies.
+
+Vanwege de natuur van de taal geldt het lezen variabele (of velden) en de invocatie van methoden ook als een expressie. Daarnaast kent de taal twee speciale functies, namelijk de read() en de write() instructie die onderdeel zijn van de \emph{Basic Expression Language}.
+
+Ook kunnen alle waarden naar hartelust gecast worden. Hierbij gelden natuurlijk dezelfde regels in elke andere taal. Een cast blijft immers niet zonder risico.
+
+Naast al deze constructies kent VNVD nog een aantal andere handige concepten die het programmeren vergemakkelijken en de taal zelf krachtiger maken.

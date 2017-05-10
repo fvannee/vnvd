@@ -1,0 +1,32 @@
+import System;
+
+namespace Tests
+{
+   // circular extends
+	class public C extends B
+	{
+	   	
+	}
+	
+	class public B extends C
+	{
+	
+	}
+	
+	// extending non existant type
+	class public D extends NonExistant
+	{
+	
+	}
+	
+	// extending interface
+	class public E extends Inter
+	{
+	
+	}
+	
+	interface public Inter
+	{
+	
+	}
+}

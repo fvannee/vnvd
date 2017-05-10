@@ -1,0 +1,15 @@
+import System;
+import System.Collections;
+import System.Drawing;
+import System.Timers;
+import System.Windows.Forms;
+import System.ComponentModel;
+
+namespace BoterKaasEieren
+{
+	interface public IStrategie
+	{
+	   Int32 BerekenZet(Bord bord, Mark mark);
+	}
+
+}

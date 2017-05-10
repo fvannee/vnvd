@@ -1,0 +1,13 @@
+import System;
+
+namespace DebugLib
+{
+	class public DebugPrinter
+	{
+		public static void PrintMessage(String message)
+		{
+			Console::WriteLine(message);
+		}
+	}
+}
+

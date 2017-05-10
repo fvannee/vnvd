@@ -1,0 +1,12 @@
+import System;
+
+namespace Tests
+{
+   class public RuntimeError
+   {
+      public static void Main(String[] argv)
+      {
+         10 / 0;
+      }
+   }
+}

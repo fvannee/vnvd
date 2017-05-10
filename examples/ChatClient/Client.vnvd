@@ -1,0 +1,68 @@
+import AnotherNamespace.InnerNamespace;
+import System;
+import System.Collections;
+import System.Net;
+import System.IO;
+import System.Net.Sockets;
+import System.Threading;
+
+namespace ChatClient
+{
+	class public Client
+	{
+	   private TcpClient client;
+	   private String address;
+	   private Int32 port;
+	   private StreamReader reader;
+	   private StreamWriter writer;
+	   private IMessageListener listener;
+	   
+	   public Client(IMessageListener listener, String address, Int32 port)
+	   {
+	      this::listener = listener;
+	      this::address = address;
+	      this::port = port;   
+	   }
+	   
+	   public void Start()
+	   {
+	   	try
+	      {
+   	      this::client = new TcpClient(this::address, this::port);
+   	      this::reader = new StreamReader(this::client::GetStream());
+   	      this::writer = new StreamWriter(this::client::GetStream());
+   	      
+   	      String line;
+   	      
+   	      while (line = this::reader::ReadLine(); line != null; )
+   	      {
+   	         Object[] o;
+   	         o = new Object[1];
+   	         o[0] = line;
+   	         //this::listener::Testt();
+   	         this::listener::get_InvokeRequired();
+   	         this::listener::Invoke(new ParameterizedThreadStart(this::listener::MessageReceived), new Object[] { line });
+   	      };
+	      }
+	      catch (IOException ex)
+	      {
+	      }
+	      catch (SocketException ex)
+	      {
+	      }
+	      finally
+	      {
+	         if (this::client != null;) then
+	         {
+	            this::client::Close();
+	         } ;
+	      };
+	   }
+	   
+	   public void WriteLine(String message)
+	   {
+	      this::writer::WriteLine(message);
+	      this::writer::Flush();
+	   }
+	}
+}

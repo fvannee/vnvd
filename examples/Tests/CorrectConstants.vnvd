@@ -1,0 +1,24 @@
+import System;
+
+namespace Tests
+{
+	class public Constants
+	{
+		public static void Main(String[] argv)
+		{
+			const Int32[] arrayConstant = {0, 1, 2, 3, 4};
+			const String boodschap = "Deze test werkt!\n";
+			const String[] arrayBoodschap = {"Inderdaad..."};
+			
+			Console::WriteLine(arrayConstant[0] + arrayConstant[1] + arrayConstant[2] + arrayConstant[3] + arrayConstant[4]);
+			Console::WriteLine(boodschap + arrayBoodschap[0]);
+			Console::WriteLine(Constants::constantNummer());
+		}
+		
+		public static Int32 constantNummer()
+		{
+			const Int32 nummer = 1337;
+			nummer;
+		}
+	}
+}

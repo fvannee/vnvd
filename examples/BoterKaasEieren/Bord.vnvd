@@ -1,0 +1,182 @@
+import System;
+
+namespace BoterKaasEieren
+{
+   class public Bord
+   {
+      public static initonly Int32 DIM;
+      
+      private Mark[] bord;
+      
+      static
+      {
+         Bord::DIM = 3;
+      }
+      
+      public Bord()
+      {
+         this::bord = new Mark[Bord::DIM * Bord::DIM];
+         this::Reset();
+      }
+      
+      public Bord DeepCopy()
+      {
+         Bord copy;
+         copy = new Bord();
+         Int32 i;
+         i = 0;
+         while (i < Bord::DIM * Bord::DIM;)
+         {
+            copy::SetVakje(i, this::GetVakje(i));
+         };
+         copy;
+      }
+      
+      public Int32 Index(Int32 rij, Int32 kol)
+      {
+         Bord::DIM * rij + kol;
+      }
+      
+      public void Reset()
+      {
+         Int32 i;
+         i = 0;
+         while (i < Bord::DIM * Bord::DIM;)
+         {
+            this::SetVakje(i, Mark::EMPTY);
+            i = i + 1;
+         };
+      }
+      
+      public void SetVakje(Int32 rij, Int32 kol, Mark m)
+      {
+         this::SetVakje(this::Index(rij, kol), m);
+      }
+      
+      public void SetVakje(Int32 i, Mark m)
+      {
+         this::bord[i] = m;
+      }
+      
+      public Mark GetVakje(Int32 rij, Int32 kol)
+      {
+         this::GetVakje(this::Index(rij, kol));
+      }
+      
+      public Mark GetVakje(Int32 i)
+      {
+         this::bord[i];
+      }
+      
+      public Boolean HeeftRij(Mark mark)
+      {
+         Boolean found = false;
+       	Int32 i = 0;
+       	Int32 j;
+       	while (i < Bord::DIM && !found;)
+       	{
+       		j = 0;
+       		found = true;
+       		while (j < Bord::DIM && found;)
+       		{
+       			found = this::GetVakje(i, j) == mark;
+       			j = j + 1;
+       		};
+       		i = i + 1;
+       	};
+       	found;
+      }
+      
+      public Boolean HeeftKolom(Mark mark)
+      {
+         Boolean found = false;
+       	Int32 i = 0;
+       	Int32 j;
+       	while (i < Bord::DIM && !found;)
+       	{
+       		j = 0;
+       		found = true;
+       		while (j < Bord::DIM && found;)
+       		{
+       			found = this::GetVakje(j, i) == mark;
+       			j = j + 1;
+       		};
+       		i = i + 1;
+       	};
+       	found;
+      }
+      
+      public Boolean HeeftDiagonaal(Mark mark)
+      {
+       	Boolean d1, d2;
+       	Int32 i = 0;
+       	d1 = d2 = true;
+       	while (i < Bord::DIM && (d1 || d2);)
+       	{
+       		d1 = d1 && this::GetVakje(i, i) == mark;
+       		d2 = d2 && this::GetVakje(i, Bord::DIM - i - 1) == mark;
+       		i = i + 1;
+       	};
+       	d1 || d2;
+      }
+      
+      public Boolean HeeftWinnaar()
+      {
+         this::HeeftGewonnen(Mark::XX) || this::HeeftGewonnen(Mark::OO);
+      }
+      
+      public Boolean GameOver()
+      {
+         this::HeeftWinnaar() || this::IsVol();
+      }
+      
+      public Boolean IsVol()
+      {
+         Int32 i;
+         i = 0;
+         Boolean vol;
+         vol = true;
+         while (i < Bord::DIM * Bord::DIM && vol;)
+         {
+            vol = this::GetVakje(i) != Mark::EMPTY;
+            i = i + 1;
+         };
+         vol;
+      }
+      
+      public Boolean HeeftGewonnen(Mark m)
+      {
+         this::HeeftRij(m) || this::HeeftKolom(m) || this::HeeftDiagonaal(m);
+      }
+      
+      public Boolean IsVakje(Int32 rij, Int32 kolom)
+      {
+         this::IsVakje(this::Index(rij, kolom));
+      }
+      
+      public Boolean IsVakje(Int32 i)
+      {
+         i < Bord::DIM * Bord::DIM && i >= 0;
+      }
+      
+      public Boolean IsLeegVakje(Int32 rij, Int32 kolom)
+      {
+         this::IsLeegVakje(this::Index(rij, kolom));
+      }
+      
+      public Boolean IsLeegVakje(Int32 i)
+      {
+         this::bord[i] == Mark::EMPTY;
+      }
+      
+      public Boolean IsCorrecteZet(Int32 i)
+      {
+         this::IsVakje(i) && this::IsLeegVakje(i);
+      }
+      
+      public Boolean IsCorrecteZet(Int32 rij, Int32 kol)
+      {
+         this::IsCorrecteZet(this::Index(rij, kol));
+      }
+   }
+}

@@ -1,0 +1,500 @@
+\section{Testplan en testresultaten}
+Om te zorgen dat de VNVD compiler niet alleen volledig functioneel is, maar ook correct functioneert, zijn er een aantal test programma's gedefinieerd. Een aantal van deze tests zijn zeer uitgebreid en een aantal zijn kleine testjes. Deze tests zijn ook allemaal op soft-copy meegeleverd.
+
+Van elke test zijn de opzet van de test en de resultaten van de test besproken. Hierdoor zijn de tests goed reproduceerbaar en de resultaten makkelijk toetsbaar.
+
+\subsection{BoterKaasEieren}
+De testapplicatie \textit{Boter, Kaas en Eieren} is tevens de uitgebreide testapplicatie, zoals in de appendices vermeld. Dit is een applicatie om een ouderwets spelletje boter, kaas en eieren te spelen tegen een andere persoon, een domme computer of een intelligente \textit{AI}. Het is overigens ook mogelijk om twee \textit{AI}s tegen elkander te laten spelen.
+
+\subsubsection{Testopzet}
+De broncode bestaat uit een aantal bestanden, die naast op de meegeleverde CD-Rom ook in de bijbehorende appendix te vinden zijn. Deze kunnen gecompileerd worden met de volgende opdracht:
+
+\begin{lstlisting}
+Vnvd.exe --ref:System --ref:System.Windows.Forms --ref:System.Drawing --out:BKE.exe Bord.vnvd Mark.vnvd MensSpeler.vnvd Spel.vnvd ComputerSpeler.vnvd IStrategie.vnvd Speler.vnvd BkeGui.vnvd IMessageListener.vnvd BesteStrategie.vnvd DommeStrategie.vnvd
+\end{lstlisting}
+
+De applicatie kan daarna uitgevoerd worden door de executable \textit{BKE.exe} op te starten.
+
+\subsubsection{Testresultaten}
+Deze applicatie valt succesvol te compileren. De uitvoer van de VNVD compiler is dan ook niet erg indrukwekkend voor deze applicatie:
+
+\begin{lstlisting}
+Vnvd Compiler v1.3.3.8
+======================
+
+\end{lstlisting}
+
+Daarnaast valt de executable te controleren met de assembly verifier die bij de virtuele machine hoort, ook dit gaat naar behoren:
+
+\begin{lstlisting}
+Microsoft (R) .NET Framework PE Verifier. Version 3.5.21022.8
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+All Classes and Methods in BKE.exe Verified.
+\end{lstlisting}
+
+Tijdens het draaien van de applicatie werkt het geheel ook naar behoren. Bij wijze van steekproef vallen er een aantal spelletjes te spelen op verscheidene configuraties.
+
+\subsection{Bounce}
+De test \textit{Bounce} is niet alleen een taal test maar ook een test van de interactie met de onderliggende libraries.
+
+\subsubsection{Testopzet}
+De \textit{Bounce} test zal eerst een library compileren, genaamd \textit{DebugLib.dll}. Daarna zal er een executable \textit{Bounce.exe} gecompileerd worden. Deze compilatie opdracht is als volgt:
+
+\begin{lstlisting}
+Vnvd.exe DebugLib.vnvd --out:DebugLib.dll
+Vnvd.exe Bounce.vnvd --out:Bounce.exe --ref:System.Windows.Forms --ref:System --ref:System.Drawing --ref:DebugLib.dll
+\end{lstlisting}
+
+Daarna kan de applicatie gestart worden door \textit{Bounce.exe} te executeren. Bij executie zal de applicatie een rode bal tekenen die tegen de randen van het venster stuitert. Daarnaast zullen er regels op de standard output worden geprint.
+
+Het correct werken van deze test betekent dat VNVD in staat is geweest globale libraries aan te koppelen, die gebruikt worden voor het tekenen en het venster, en ook een lokaal library, die gebruikt wordt om tekst op de standard output af te drukken.
+
+\subsubsection{Testresultaten}
+De volledige compilatie van het \textit{Bounce} programma geeft een tweetal tevreden compilatie uitvoeren:
+
+\begin{lstlisting}
+Vnvd Compiler v1.3.3.8
+======================
+
+Vnvd Compiler v1.3.3.8
+======================
+
+\end{lstlisting}
+
+Daarnaast kan ook de assembly verifier geen problemen aanwijzen. De compilatie is dus in ieder geval geslaagd. Als de gecompileerde applicatie opgestart wordt begint de animatie van de heen en weer stuiterende bal te draaien, terwijl er op de console bij elke collision een melding wordt gezet. De applicatie functioneert dus naar wens.
+
+\subsection{ChatClient}
+De \textit{ChatClient} applicatie is een client voor de server van de \textit{ChatServer} applicatie. Deze applicatie levert een textit{GUI} voor de desbetreffende chat server. Hiermee kunnen berichtjes verstuurt worden naar andere clients.
+
+\subsubsection{Testopzet}
+Om de code van deze test applicatie te compileren naar de executable \textit{Client.exe} kan de volgende opdracht uitgevoerd worden:
+
+\begin{lstlisting}
+Vnvd.exe --out:Client.exe --ref:System --ref:System.Drawing --ref:System.Windows.Forms Client.vnvd Gui.vnvd IMessageListener.vnvd
+\end{lstlisting}
+
+Bij executie zal de applicatie een interface openen. In deze interface kan eerst een naam opgegeven worden. Vervolgens zullen alle berichten naar alle andere clients doorgestuurd worden, met de naam als prefix. Voor de werking van de applicatie is het wel vereist dat de server draait.
+
+\subsubsection{Testresultaten}
+Ook deze applicatie valt succesvol te compileren. Dit geeft de standaard compiler uitvoer voor een correct werkende applicatie:
+
+\begin{lstlisting}
+Vnvd Compiler v1.3.3.8
+======================
+
+\end{lstlisting}
+
+Ook de \textit{.NET Framework PE Verifier} is tevreden over het product van de VNVD compiler:
+
+\begin{lstlisting}
+Microsoft (R) .NET Framework PE Verifier. Version 3.5.21022.8
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+All Classes and Methods in Client.exe Verified.
+\end{lstlisting}
+
+Daarnaast valt in een aantal praktijk tests berichten over de server te sturen. Deze test blijkt dus geslaagd.
+
+\subsection{ChatServer}
+Deze test applicatie is de serverende wederhelft van de \textit{ChatClient}.
+
+\subsubsection{Testopzet}
+Deze applicatie kan met het volgende commando door de VNVD compiler gehaald worden:
+
+\begin{lstlisting}
+Vnvd.exe --out:Server.exe --ref:System ClientHandler.vnvd Server.vnvd
+\end{lstlisting}
+
+Als de applicatie \textit{Server.exe} vervolgens ge\"executeerd wordt zal er een server opgestart worden. Door het opstarten van de client applicatie wordt er verbinding gemaakt met de gestartte server.
+
+\subsubsection{Testresultaten}
+De resultaten naar de test van de werking van deze applicatie zijn te vinden onder de test van de client. Om echter te tonen dat de compilatie ook succes vol liep, hierbij de compiler uitvoer:
+
+\begin{lstlisting}
+Vnvd Compiler v1.3.3.8
+======================
+
+\end{lstlisting}
+
+Ook de \textit{.NET Framework PE Verifier} is tevreden over de gecompileerde server:
+
+\begin{lstlisting}
+Microsoft (R) .NET Framework PE Verifier. Version 3.5.21022.8
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+All Classes and Methods in Server.exe Verified.
+\end{lstlisting}
+
+\subsection{Tests/ContextIncorrect.vnvd}
+Deze test zal de context checker aan de tand voelen. Dat betekent dat er verkeerde typen gebruikt zullen worden om zo te kijken of de checker dit opmerkt.
+
+\subsubsection{Testopzet}
+Deze test bestaat uit een bestand, genaamd \textit{ContextIncorrect.vnvd}. Dit bestand bevat een aantal context gerelateerde fouten. Om dit bestand te compileren kan de VNVD compiler als volgt worden aangeroepen:
+
+\begin{lstlisting}
+Vnvd.exe ContextIncorrect.vnvd
+\end{lstlisting}
+
+Deze testapplicatie is een VNVD implementatie van testprogramma \textit{A.3} in de practicumhandleiding.
+
+\subsubsection{Testresultaten}
+Door de vele context fouten geeft de VNVD compiler voor deze test een zeer grote hoeveelheid uitvoer. Aan de hand hiervan zijn gelukkig wel de gemaakte fouten aan te wijzen:
+
+\begin{lstlisting}
+Vnvd Compiler v1.3.3.8
+======================
+
+ContextIncorrect.vnvd   11:11   Left part of assignment is not assignable:
+ContextIncorrect.vnvd   21:16   Types do not match: System.Int32 and System.Char
+ContextIncorrect.vnvd   21:20   Types do not match: ~error~.~error~ and System.Int32
+ContextIncorrect.vnvd   21:11   Types do not match: System.Boolean and ~error~.~error~
+ContextIncorrect.vnvd   23:11   Types do not match: System.Boolean and System.Int32
+ContextIncorrect.vnvd   23:17   Types do not match: ~error~.~error~ and System.Char
+ContextIncorrect.vnvd   25:13   Types do not match: System.Char and System.Boolean
+ContextIncorrect.vnvd   26:11   Types do not match: System.Boolean and System.Int32
+ContextIncorrect.vnvd   27:15   Types do not match: System.Int32 and System.Char
+ContextIncorrect.vnvd   29:11   Types do not match: System.Char and System.Int32
+ContextIncorrect.vnvd   30:11   Types do not match: System.Boolean and System.Int32
+ContextIncorrect.vnvd   31:9    Type p cannot be found
+ContextIncorrect.vnvd   31:12   Type q cannot be found
+ContextIncorrect.vnvd   34:22   A compound expression must not end with a declaration.
+ContextIncorrect.vnvd   36:20   Types do not match: System.Void and System.Int32
+ContextIncorrect.vnvd   38:13   Types do not match: System.Char and System.Void
+ContextIncorrect.vnvd   39:12   Types do not match: System.Int32 and System.Void
+\end{lstlisting}
+
+\subsection{Tests/CorrectArrays.vnvd}
+Om te controleren of de implmentatie van arrays naar behoren werkt is deze test nodig. In deze test worden beide wijzen van array definitie getest en er wat mee gewerkt.
+
+\subsubsection{Testopzet}
+Het gemaakte testprogramma kan naar een executable met de naam \textit{CorrectArrays.exe} gecompileerd worden door het volgende commando uit te voeren:
+
+\begin{lstlisting}
+Vnvd.exe CorrectArrays.vnvd
+\end{lstlisting}
+
+\subsubsection{Testresultaten}
+Wederom heeft de compiler geen fouten te melden. Daarnaast is ook de assembly verifier tevreden over de executable. Door vervolgens de applicatie uit te voeren kan ook de werking getest worden. Deze uitvoer is als volgt:
+
+\begin{lstlisting}
+2
+10
+10
+\end{lstlisting}
+
+Hoewel dit misschien niet zeer veelzeggend is, is dit wel correct. Het eerste getal is namelijk de lengte van een van de arrays. Het tweede getal de optelling van een array met de waarden 5 en 5. Het laatste getal is ook een optelling, maar dan van een array met de getallen 1 tot en met 4.
+
+Ook de test van de arrays verloopt dus naar wens.
+
+\subsection{Tests/CorrectConstants.vnvd}
+De test \textit{CorrectConstants.vnvd} test de constante mogelijkheden aan boord van VNVD. Constanten worden direct vervangen in de assembly.
+
+\subsubsection{Testopzet}
+De executable \textit{CorrectConstants.exe} valt te generen door de VNVD compiler de test te laten compileren. Dit kan met het volgende commando:
+
+\begin{lstlisting}
+vnvd.exe CorrectConstants.vnvd
+\end{lstlisting}
+
+De test kan vervolgens ook gedraaid worden met behulp van de executable. De test zal wat constanten naar het scherm printen.
+
+\subsubsection{Testresultaten}
+Zoals hieronder te zien is de VNVD compiler tevreden met het resultaat:
+
+\begin{lstlisting}
+Vnvd Compiler v1.3.3.8
+======================
+
+\end{lstlisting}
+
+Ook de \textit{.NET Framework PE Verifier} geeft aan dat de gecompileerde executable goed is:
+
+\begin{lstlisting}
+Microsoft (R) .NET Framework PE Verifier. Version 3.5.21022.8
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+All Classes and Methods in CorrectConstants.exe Verified.
+\end{lstlisting}
+
+Bij het draaien geeft de executable de waarden van de constanten correct weer:
+
+\begin{lstlisting}
+10
+Deze test werkt!
+Inderdaad...
+1337
+\end{lstlisting}
+
+\subsection{Tests/CorrectTest.vnvd}
+Deze test controleert de functionaliteiten van een expressie taal. Alle facetten van de \textit{Basic Expression Language} komen langs in deze test.
+
+\subsubsection{Testopzet}
+Deze test valt te compileren door de volgende regel uit te voeren:
+
+\begin{lstlisting}
+Vnvd.exe CorrectTest.vnvd
+\end{lstlisting}
+
+Vervolgens valt de executable \textit{CorrectTest.exe} aan te roepen om het product uit te voeren. De executable zal eerst drie maal een geheel getal verwachten. Daarna dient er ofwel "True", ofwel "False", ingevoerd te worden. Tot slot mag er nog een willekeurig karakter ingevoerd worden. Deze applicatie correspondeert met testprogramma \textit{A.1} in de practicumhandleiding.
+
+\subsubsection{Testresultaten}
+Dit testprogramma valt met succes te compileren en eveneens succesvol te verifi\"eren. Als de applicatie vervolgens gedraait wordt met de volgende invoer:
+
+\begin{lstlisting}
+0
+1
+1
+False
+c
+\end{lstlisting}
+
+Wordt de volgende uitvoer, die ook geleverd wordt, terug gegeven:
+
+\begin{lstlisting}
+01FalseTrue1FalseTrueaTrue3Trueb
+\end{lstlisting}
+
+De rede dat dit een dergelijke one-liner wordt is dat er geen spaties of newlines uitgevoerd worden. Bij draai\"ing vanaf de console kan de uitvoer anders lijken, dit komt dan waarschijnlijk doordat de invoer tussen de uitvoer door staat.
+
+\subsection{Tests/CorrectWhileIfFor.vnvd}
+In deze test worden alle controle structuren uitvoerig getest.
+
+\subsubsection{Testopzet}
+Ook deze test bestaat uit een bestand, \textit{CorrectWhileIfFor.vnvd}, dat als volgt naar de executable \textit{CorrectWhileIfFor.exe} te compileren valt:
+
+\begin{lstlisting}
+Vnvd.exe CorrectWhileIfFor.vnvd
+\end{lstlisting}
+
+Bij het uitvoeren zal deze executable een aantal waarden naar het scherm uitvoeren. Deze dienen als volgt te zijn:
+
+\begin{lstlisting}
+Waardering: Onvoldoende!
+Waardering: Voldoende!
+Waardering: Goed!
+Waardering: Slecht!
+Waardering: Onvoldoende!
+Waardering: Voldoende!
+Waardering: Goed!
+Waardering: Slecht!
+14328
+F
+v
+N
+S
+V
+15
+\end{lstlisting}
+
+\subsubsection{Testresultaten}
+De VNVD compiler geeft geen foutmeldingen in zijn uitvoer, wat een goed teken is:
+
+\begin{lstlisting}
+Vnvd Compiler v1.3.3.8
+======================
+
+\end{lstlisting}
+
+Na een succesvolle compilatie geeft een consultatie van de assembly verifier ook geen slechte tekens:
+
+\begin{lstlisting}
+Microsoft (R) .NET Framework PE Verifier. Version 3.5.21022.8
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+All Classes and Methods in CorrectWhileIfFor.exe Verified.
+\end{lstlisting}
+
+Na executie geeft het gecompileerde bestand ook de correcte uitvoer, zoals in de voorgaande sectie gespecificeerd. Deze test is dus correct te bevinden.
+
+\subsection{Tests/IncorrectFor.vnvd}
+Deze test is een van de incorrecte tests. Oftewel, een test die zou moeten falen. In deze specifieke variant wordt getest of de checker wel streng genoeg is bij de for loop.
+
+\subsubsection{Testopzet}
+In de test, \textit{IncorrectFor.vnvd}, wordt geprobeerd een for loop te maken over een niet enummereerbaar object. Oftewel, een object dat geen verzameling is. Om te proberen deze test te compileren roept men VNVD als volgt aan:
+
+\begin{lstlisting}
+Vnvd.exe IncorrectFor.vnvd
+\end{lstlisting}
+
+\subsubsection{Testresultaten}
+Deze applicatie wil niet compileren, wat natuurlijk het doel is van de test. Ook de gegeven foutmelding is bevredigend:
+
+\begin{lstlisting}
+Vnvd Compiler v1.3.3.8
+======================
+
+IncorrectFor.vnvd       9:9     Expression used as in-clause is not enumerable: System.Object
+\end{lstlisting}
+
+\subsection{Tests/IncorrectIf.vnvd}
+In deze test wordt gepoogd een aantal context-beperkingen van een ternary expressie te doorbreken. Het doel van de test is te zorgen dat de checker de fouten ontdekt en rapporteert.
+
+\subsubsection{Testopzet}
+Het bestand van de test, \textit{IncorrectIf.vnvd}, kan gecompileerd worden. De VNVD compiler geeft vervolgens foutmeldingen terug met de oorzaken van de problemen. De compilatie gaat als volgt:
+
+\begin{lstlisting}
+Vnvd.exe IncorrectIf.vnvd
+\end{lstlisting}
+
+\subsubsection{Testresultaten}
+Zoals gewenst sputtert de VNVD compiler tegen en geeft de volgende uitvoer:
+
+\begin{lstlisting}
+Vnvd Compiler v1.3.3.8
+======================
+
+IncorrectIf.vnvd        14:14   Types do not match: System.Int32 and System.Void
+IncorrectIf.vnvd        11:9    System.Boolean expected here, got: System.Int32
+\end{lstlisting}
+
+\subsection{Tests/IncorrectOOP.vnvd}
+Dit is de eerste van de twee structuur tests. Hierin wordt gekeken of alle object geori\"enteerde concepten wel naar behoren gecontroleerd worden.
+
+\subsubsection{Testopzet}
+Deze test dient compilatie fouten te geven als men het volgende commando uitvoert:
+
+\begin{lstlisting}
+Vnvd.exe IncorrectOOP.vnvd
+\end{lstlisting}
+
+\subsubsection{Testresultaten}
+Zoals verwacht is de VNVD compiler niet tevreden met de code en vindt de foute implementaties:
+
+\begin{lstlisting}
+Vnvd Compiler v1.3.3.8
+======================
+
+11:1    Circular extendation detected at Tests.C and Tests.B
+17:1    Type: NonExistant not found
+23:1    Cannot extend interface or value type Tests.Inter
+\end{lstlisting}
+
+\subsection{Tests/IncorrectOOP2.vnvd}
+Dit is de tweede van de twee structuur tests. Hierin wordt gekeken of alle object geori\"enteerde concepten wel naar behoren gecontroleerd worden.
+
+\subsubsection{Testopzet}
+Deze test dient compilatie fouten te geven als men het volgende commando uitvoert:
+
+\begin{lstlisting}
+Vnvd.exe IncorrectOOP2.vnvd
+\end{lstlisting}
+
+\subsubsection{Testresultaten}
+Wederom weet de VNVD compiler de vinger op de zere plek te leggen:
+
+\begin{lstlisting}
+Vnvd Compiler v1.3.3.8
+======================
+
+19:6    Cannot declare abstract method AbstractMethod in a non-abstract class: A
+25:4    No suitable method found to override: Test2
+31:4    No suitable method found to override: Test2
+\end{lstlisting}
+
+\subsection{Tests/IncorrectWhile.vnvd}
+De test \textit{IncorrectWhile.vnvd} probeert context-beperkingen voor while loops te negeren. De VNVD compiler dient dit af te keuren.
+
+\subsubsection{Testopzet}
+Deze test kan gedraaid worden door VNVD als volgt aan te roepen:
+
+\begin{lstlisting}
+Vnvd.exe IncorrectWhile.vnvd
+\end{lstlisting}
+
+\subsubsection{Testresultaten}
+Zoals behoort keurt de compiler de code af. Dit gebeurt met de volgende uitvoer:
+
+\begin{lstlisting}
+Vnvd Compiler v1.3.3.8
+======================
+
+IncorrectWhile.vnvd     11:9    System.Boolean expected here, got: System.Int32
+IncorrectWhile.vnvd     16:11   Types do not match: System.Int32 and System.Void
+\end{lstlisting}
+
+\subsection{Tests/MethodCall.vnvd}
+Deze test roept enkele methoden aan op zowel objecten als primitieve typen.
+
+\subsubsection{Testopzet}
+Deze test kan simpel weg gedraaid worden door het bestand \textit{MethodCall.vnvd} te compileren en vervolgens de gemaakte executable te executeren. De uitvoer dient dan als volgt te zijn:
+
+\begin{lstlisting}
+5
+3
+15
+System.Int32[]
+Hi.
+\end{lstlisting}
+
+Het compileren van \textit{MethodCall.vnvd} naar \textit{MethodCall.exe} kan met de volgende opdracht:
+
+\begin{lstlisting}
+Vnvd.exe MethodCall.vnvd
+\end{lstlisting}
+
+\subsubsection{Testresultaten}
+Zoals verwacht hebben de VNVD compiler en de \textit{.NET Framework PE Verifier} niets te klagen over de testapplicatie. Daarnaast komt het testprogramma bij een test run met de correcte uitvoer aanzetten, waardoor geconcludeerd kan worden dat de getestte delen naar behoren werken.
+
+\subsection{Tests/RuntimeError.vnvd}
+In deze applicatie wordt een simpele runtime error gemaakt. Deze kan niet afgevangen worden door de VNVD compiler.
+
+\subsubsection{Testopzet}
+Deze applicatie kan gecompileerd worden naar \textit{RuntimeError.exe}. Bij executie van dit programma zal er vervolgens een runtime error optreden. Om de compilatie uit te voeren geeft men het volgende commando op:
+
+\begin{lstlisting}
+Vnvd.exe RuntimeError.vnvd
+\end{lstlisting}
+
+Deze testapplicatie is een VNVD implementatie van testprogramma \textit{A.4} in de practicumhandleiding.
+
+\subsubsection{Testresultaten}
+Deze applicatie valt succesvol te compileren. De uitvoer van de VNVD compiler is dan ook leeg:
+
+\begin{lstlisting}
+Vnvd Compiler v1.3.3.8
+======================
+
+\end{lstlisting}
+
+Daarnaast valt de executable te controleren met de assembly verifier die bij de virtuele machine hoort, ook dit gaat naar behoren:
+
+\begin{lstlisting}
+Microsoft (R) .NET Framework PE Verifier. Version 3.5.21022.8
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+All Classes and Methods in RuntimeError.exe Verified.
+\end{lstlisting}
+
+Bij executie gaat het echter fout. De runtime error treed dan daadwerkelijk op en zorgt er voor dat de applicatie crasht:
+
+\begin{lstlisting}
+Unhandled Exception: System.DivideByZeroException: Division by zero
+  at Tests.RuntimeError.Main (System.String[] argv) [0x00000]
+\end{lstlisting}
+
+\subsection{Tests/SyntaxIncorrect.vnvd}
+In deze test zijn er enkele syntax fouten opgenomen die de taal niet mag accepteren.
+
+\subsubsection{Testopzet}
+Deze test kan gecompileerd worden met de volgende aanroep:
+
+\begin{lstlisting}
+Vnvd.exe SyntaxIncorrect.vnvd
+\end{lstlisting}
+
+Deze applicatie is een VNVD implementatie van testprogramma \textit{A.2} in de practicumhandleiding.
+
+\subsubsection{Testresultaten}
+De VNVD compiler komt met de verwachte foutmelding bij een poging tot compilatie:
+
+\begin{lstlisting}
+Vnvd Compiler v1.3.3.8
+======================
+
+line 12:13 no viable alternative at input '*'
+line 15:11 mismatched input ':' expecting SEMICOLON
+line 18:13 missing LPAREN at 'gebin'
+line 18:23 missing IN at 'repeat'
+line 18:29 mismatched input ';' expecting RPAREN
+\end{lstlisting}

@@ -1,0 +1,105 @@
+import System;
+
+namespace Tests
+{
+   class public CorrectWhileIfFor
+   {
+      public static void Main(String[] argv)
+      {
+         CorrectWhileIfFor::PrintScore(45);
+         CorrectWhileIfFor::PrintScore(55);
+         CorrectWhileIfFor::PrintScore(80);
+         CorrectWhileIfFor::PrintScore(34);
+         
+         CorrectWhileIfFor::PrintScore2(45);
+         CorrectWhileIfFor::PrintScore2(55);
+         CorrectWhileIfFor::PrintScore2(80);
+         CorrectWhileIfFor::PrintScore2(34);
+         
+         Console::WriteLine(CorrectWhileIfFor::FibonacciSum(20000));
+         
+         CorrectWhileIfFor::PrintArray(new String[] { "F", "v", "N", "S", "V" });
+         
+         if (Int32 i; i = 15; true;) then
+         {
+            // test scope rules
+            Console::WriteLine(i);
+         } ;
+      }
+      
+      public static void PrintArray(String[] test)
+      {
+         for (String s in test)
+         {
+            Console::WriteLine(s);
+         };
+      }
+      
+      public static Int32 FibonacciSum(System.Int32 max)
+		{
+			Int32 sum, fib_1, fib_2;
+			sum = 0;
+			fib_1 = fib_2 = 1;
+			while (Int32 temp; fib_2 < max;)
+			{
+				if (fib_2 % 2 == 0;) then
+				{
+					sum = sum + fib_2;
+				} ;
+				
+				temp = fib_2;
+				fib_2 = fib_1 + fib_2;
+				fib_1 = temp;
+			};
+			
+			sum;
+		}
+		
+      public static void PrintScore(Int32 score)
+      {
+         String waardering;
+         
+         if (score >= 80;) then
+         {
+            waardering = "Goed!";
+         }
+         else if (score >= 55;) then
+         {
+            waardering = "Voldoende!";
+         }
+         else if (score >= 35;) then
+         {
+            waardering = "Onvoldoende!";
+         }
+         else
+         {
+            waardering = "Slecht!";
+         }   ;
+         
+         Console::WriteLine("Waardering: " + waardering);
+      }
+      
+      public static void PrintScore2(Int32 score)
+      {
+         Console::WriteLine("Waardering: " +
+            (if (score >= 80;) then
+            {
+               "Goed!";
+            }
+            else if (score >= 55;) then
+            {
+               "Voldoende!";
+            }
+            else if (score >= 35;) then
+            {
+               "Onvoldoende!";
+            }
+            else
+            {
+               "Slecht!";
+            }   )
+         );
+      }
+      
+   }
+}

@@ -1,0 +1,22 @@
+import System;
+
+namespace Tests
+{
+   class public IfIncorrect
+   {
+      public static void Main(String[] argv)
+      {
+         Int32 i;
+         i = 10;
+         if (i == 10; i = i + 1;) then // type of expression is not boolean
+         {
+            Int32 j;
+            j = if (i == 10;) then 25 else new Object() ; //trying to assign result of an if statement which is void
+         }
+         else
+         {
+            
+         } ;
+      }
+   }
+}

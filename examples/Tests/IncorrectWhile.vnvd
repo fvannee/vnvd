@@ -1,0 +1,25 @@
+import System;
+
+namespace Tests
+{
+   class public WhileIncorrect
+   {
+      public static void Main(String[] argv)
+      {
+         Int32 i;
+         i = 0;
+         while (i < 15; i = i + 1;) // type of last expression is not bool
+         {
+            Console::WriteLine(i);
+         };
+         
+         i =
+            {
+               while (true;)
+               {
+                  5;
+               };
+            };  // while has return type void, so this is not allowed
+      }
+   }
+}

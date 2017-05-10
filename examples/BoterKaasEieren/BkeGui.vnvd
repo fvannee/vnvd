@@ -1,0 +1,203 @@
+import System;
+import System.Collections;
+import System.Drawing;
+import System.Timers;
+import System.Windows.Forms;
+import System.Drawing;
+import System.Threading;
+
+namespace BoterKaasEieren
+{
+	class public BkeGui extends Form implements IMessageListener
+	{
+	   private Spel spel;
+	   
+	   private Button button;
+	   private Button[] tiles;
+	   private Label label;
+	   
+	   private RadioButton s1radio1, s1radio2, s1radio3;
+	   private RadioButton s2radio1, s2radio2, s2radio3;
+	   
+	   public static void Main()
+	   {
+	      Application::Run(new BkeGui());
+	   }
+	   
+	   public BkeGui()
+	   {  
+	      this::set_Text("Boter Kaas Eieren");
+         this::set_Size(new Size(350, 300));
+
+         Panel panel = new Panel();
+         panel::set_Size(new Size(80, 80));
+         panel::set_Location(new Point(10, 10));
+         this::get_Controls()::Add(panel);
+         
+         Label l = new Label();
+         l::set_Text("Speler 1");
+         panel::get_Controls()::Add(l);
+         
+         this::s1radio1 = new RadioButton();
+         this::s1radio1::set_Text("Human");
+         this::s1radio1::set_Checked(true);
+         this::s1radio1::set_Location(new Point(0, 20));
+         panel::get_Controls()::Add(this::s1radio1);
+
+         this::s1radio2 = new RadioButton();
+         this::s1radio2::set_Text("Domme AI");
+         this::s1radio2::set_Location(new Point(0, 40));
+         panel::get_Controls()::Add(this::s1radio2);
+         
+         this::s1radio3 = new RadioButton();
+         this::s1radio3::set_Text("Slimme AI");
+         this::s1radio3::set_Location(new Point(0, 60));
+         panel::get_Controls()::Add(this::s1radio3);
+                 
+         panel = new Panel();
+         panel::set_Size(new Size(80, 80));
+         panel::set_Location(new Point(100, 10));
+         this::get_Controls()::Add(panel);
+         
+         l = new Label();
+         l::set_Text("Speler 2");
+         panel::get_Controls()::Add(l);
+         
+         this::s2radio1 = new RadioButton();
+         this::s2radio1::set_Text("Human");
+         this::s2radio1::set_Checked(true);
+         this::s2radio1::set_Location(new Point(0, 20));
+         panel::get_Controls()::Add(this::s2radio1);
+
+         this::s2radio2 = new RadioButton();
+         this::s2radio2::set_Text("Domme AI");
+         this::s2radio2::set_Location(new Point(0, 40));
+         panel::get_Controls()::Add(this::s2radio2);
+         
+         this::s2radio3 = new RadioButton();
+         this::s2radio3::set_Text("Slimme AI");
+         this::s2radio3::set_Location(new Point(0, 60));
+         panel::get_Controls()::Add(this::s2radio3);
+         
+         panel = new Panel();
+         panel::set_Size(new Size(250, 250));
+         panel::set_Location(new Point(25, 110));
+         this::get_Controls()::Add(panel);
+	      
+	      this::tiles = new Button[9];
+	      Int32 i = 0;
+	      while (i < 9;)
+	      {
+	         Button b = new Button();
+	         this::tiles[i] = b;
+	         b::set_Name(i::ToString());
+	         b::set_Text(i::ToString());
+	         b::set_Size(new Size(40, 40));
+	         b::set_Location(new Point((i % 3) * 40, (i / 3) * 40));
+	         b::set_Enabled(false);
+	         b::Click += new EventHandler(this::move_Clicked);
+	         panel::get_Controls()::Add(b);
+	         i = i + 1;
+	      };
+	      this::button = new Button();
+	      this::button::set_Location(new Point(180, 20));
+	      this::button::set_Text("Start!");
+	      this::button::Click += new EventHandler(this::button_Clicked);
+	      this::get_Controls()::Add(this::button);
+	      
+	      this::label = new Label();
+	      this::label::set_Text("Press the start button!");
+	      this::label::set_Location(new Point(180, 50));
+	      this::label::set_AutoSize(true);
+	      this::get_Controls()::Add(this::label);
+	   }
+	   
+	   public void MessageReceived(Object message)
+	   {
+	      if (message == null;) then
+	      {
+	         Int32 i = 0;
+	         while (i < 9;)
+	         {
+	            this::tiles[i]::set_Text(i::ToString());
+	            this::tiles[i]::set_Enabled(true);
+	            i = i + 1;
+	         };
+	         Speler s = this::spel::GetHuidigeSpeler();
+	         this::label::set_Text(s::GetNaam() + " is aan zet!");
+	      }
+	      else if (message is Bord;) then
+	      {
+	         Bord b = (Bord)message;
+	         Int32 i = 0;
+	         while (i < 9;)
+	         {
+	            this::tiles[i]::set_Text(b::GetVakje(i)::ToString());
+	            i = i + 1;
+	         };
+	         Speler s = this::spel::GetHuidigeSpeler();
+	         this::label::set_Text(s::GetNaam() + " is aan zet!");
+	      }
+	      else
+	      {
+	         Int32 i = (Int32)message;
+	         if (i == -1;) then
+	         {
+	            this::label::set_Text("Gelijkspel!");
+	         }
+	         else
+	         {
+	            Speler s = this::spel::GetSpelers()[i];
+	            this::label::set_Text(s::GetNaam() + " heeft gewonnen!");
+	         } ;
+	         i = 0;
+	         while (i < 9;)
+	         {
+	            this::tiles[i]::set_Enabled(false);
+	            i = i + 1;
+	         };
+	      }  ;
+	   }
+	   
+	   private void button_Clicked(Object sender, EventArgs e)
+	   {
+	      Speler s1, s2;
+	      s1 = if (this::s1radio1::get_Checked();) then
+	         (Speler)new MensSpeler("Speler 1", Mark::XX)
+	      else if (this::s1radio2::get_Checked();) then
+	         (Speler)new ComputerSpeler("Speler 1", Mark::XX, new DommeStrategie())
+	      else
+	         (Speler)new ComputerSpeler("Speler 1", Mark::XX, new BesteStrategie())
+	       ;
+	      
+	      s2 = if (this::s2radio1::get_Checked();) then
+	         (Speler)new MensSpeler("Speler 2", Mark::OO)
+	      else if (this::s2radio2::get_Checked();) then
+	         (Speler)new ComputerSpeler("Speler 2", Mark::OO, new DommeStrategie())
+	      else
+	         (Speler)new ComputerSpeler("Speler 2", Mark::OO, new BesteStrategie())
+	       ;
+	      
+         this::spel = new Spel(s1, s2);
+         this::spel::AddObserver(this);
+         Thread t = new Thread(new ThreadStart(this::spel::Play));
+         t::set_IsBackground(true);
+         t::Start();
+	   }
+	   
+	   private void move_Clicked(Object sender, EventArgs e)
+	   {
+	      if (this::spel::GetHuidigeSpeler() is MensSpeler;) then
+	      {
+	      	Button b = (Button)sender;
+            Int32 move = Int32::Parse(b::get_Name());
+            MensSpeler s = (MensSpeler)this::spel::GetHuidigeSpeler();
+            Monitor::Enter(s);
+            s::SetTempMove(move);
+            Monitor::Pulse(s);
+            Monitor::Exit(s);
+	      } ;
+
+	   }
+	}
+}

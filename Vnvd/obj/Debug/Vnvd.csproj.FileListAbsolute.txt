@@ -1,0 +1,9 @@
+C:\Users\Floris\Documents\vnvd\trunk\Vnvd\bin\Debug\Vnvd.exe.config
+C:\Users\Floris\Documents\vnvd\trunk\Vnvd\bin\Debug\Vnvd.exe
+C:\Users\Floris\Documents\vnvd\trunk\Vnvd\bin\Debug\Vnvd.pdb
+C:\Users\Floris\Documents\vnvd\trunk\Vnvd\bin\Debug\antlr.runtime.dll
+C:\Users\Floris\Documents\vnvd\trunk\Vnvd\bin\Debug\Antlr3.Runtime.xml
+C:\Users\Floris\Documents\vnvd\trunk\Vnvd\bin\Debug\Antlr3.Utility.xml
+C:\Users\Floris\Documents\vnvd\trunk\Vnvd\obj\Debug\Vnvd.csprojResolveAssemblyReference.cache
+C:\Users\Floris\Documents\vnvd\trunk\Vnvd\obj\Debug\Vnvd.exe
+C:\Users\Floris\Documents\vnvd\trunk\Vnvd\obj\Debug\Vnvd.pdb

@@ -1,0 +1,31 @@
+import System;
+
+namespace Tests
+{
+	class public MethodCall
+	{
+		public static void Main(String[] argv)
+		{
+			const Int32 testNumber = 15;
+			Int32[] testArray = new Int32[] {1};
+			Int32 number = 5;
+			MethodCall methodCall = new MethodCall();
+			
+			Console::WriteLine(number::ToString());
+			Console::WriteLine(3::ToString());
+			Console::WriteLine(testNumber::ToString());
+			Console::WriteLine(testArray::ToString());
+			methodCall::WriteHi();
+		}
+
+		public void WriteHi()
+		{
+			Console::WriteLine(this::GetHi());
+		}
+
+		public String GetHi()
+		{
+			"Hi.";
+		}
+	}
+}

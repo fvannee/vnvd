@@ -1,0 +1,15 @@
+import System;
+
+namespace Tests
+{
+   class public ForIncorrect
+   {
+      public static void Main(String[] argv)
+      {
+         for (String s in new Object())
+         {
+            // Trying to iterate over an object, not possible
+         };
+      }
+   }
+}

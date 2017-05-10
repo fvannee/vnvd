@@ -1,0 +1,53 @@
+\section{Problemen en oplossingen}
+Bij het ontwerpen en implementeren van de compiler voor onze taal zijn ook wij tegen problemen aangelopen. Er moesten in een vroeg stadium al verschillende ontwerpkeuzes gemaakt worden die later, in een verder stadium van het ontwerpproces, soms verkeerd uit bleken te pakken. Desalniettemin is voor de meeste problemen die we zijn tegengekomen een elegante, nette oplossing gevonden.
+
+Dat gezegd hebbende merken wij op dat het lastigste onderdeel van de compiler zonder twijfel de checker is. Een checker voor een willekeurige objectgeori\"enteerde programmeertaal moet sowieso ontzettend gecompliceerd zijn. \'E\'en van de redenen hiervoor is het feit dat zulke talen de mogelijkheid tot inheritance hebben. Types van expressies hoeven vaak niet exact gelijk te zijn, als de \'e\'en maar een superklasse of interface is van de ander. Dit verschijnsel wordt ook wel polymorphism genoemd en is \'e\'en van de bouwstenen van objectgeori\"enteerde talen.
+
+Laatstgenoemde en veel andere problemen leverde interessante discussiepunten op voor de implementatie van onze taal. In de volgende paragrafen zullen we uitleggen wat voor ons de meeste problemen opleverde en de door ons gekozen oplossing voor die problemen. We splitsen dit op in drie delen, namelijk de problemen bij het maken van de parser, de checker en de generator. Het specificeren van de lexer leverde geen noemenswaardige problemen op en is daarom dus weggelaten uit dit hoofdstuk.
+
+\subsection{Parser}
+Het lastige aan het schrijven van de parser was voornamelijk dat de taal LL(1) moest zijn. Het was nodig om systematisch de grammatica op te stellen zodat left-recursion en beslissingen die niet LL(1) waren te vermijden. Hoewel een deel dus opgelost is door het herschrijven van de grammar, is een ander deel opgelost met behulp van syntactic predicates.
+
+We beschrijven nu \'e\'en probleem waarvoor het veel tijd heeft gekost om een goede oplossing te vinden.
+
+Klassen, methoden en velden hebben allen modifiers bij hun declaratie. Deze specificeren de zichtbaarheid, of dat een methode static is of dat deze een methode uit een superklasse overschrijft. In onze oorspronkelijke specificatie van de taal was in de parser niet gespecificeerd welke modifier in welke volgorde waar mocht staan, maar was er een algemene regel die alle modifiers toeliet. In een definitie van een methode werd deze regel dan gebruikt zoals hieronder beschreven.
+\begin{lstlisting}	
+modifier : PRIVATE | PUBLIC | STATIC
+	| ABSTRACT | ...;
+method_decl : modifier* type_qualifier
+	IDENTIFIER LPAREN parameter_list RPAREN
+	block_expression;
+\end{lstlisting}
+Deze regel was in deze vorm echter nooit LL(1) te krijgen, omdat het aan het begin 0 of meer modifiers kon matchen. Eerst was gekozen om een keyword 'method' te gebruiken die aan het begin van de method definitie moest staan. Dit loste de problemen op, maar was niet netjes. Daarom is later gekozen om de regel modifier op te splitsen in meerdere andere regels, waardoor het niet meer nodig is om 0 of meer te matchen. Bijvoorbeeld, de methodedeclaratie ziet er nu als volgt uit:
+\begin{lstlisting}
+method_decl : method_mod_list type_qualifier
+	IDENTIFIER LPAREN parameter_list RPAREN
+	block_expression;
+method_mod_list : access_modifier
+	(STATIC | virtual_modifier)?;
+access_modifier : PRIVATE | PUBLIC
+	| PROTECTED | INTERNAL;
+virtual_modifier : VIRTUAL | OVERRIDE;
+\end{lstlisting}	
+Op deze manier is het mogelijk om de taal zowel netjes en overzichtelijk als ook LL(1) te houden.
+
+\subsection{Checker}
+In de checker traden ook verschillende problemen op. Zo moest ervoor gezorgd worden dat eerst alle klassen gedefinieerd werden, vervolgens de methoden en daarna pas de inhoud van de methoden. Het moet in deze volgorde, omdat de een afhankelijk is van de ander. Voor de definitie van methoden moet je weten welke klassen er zijn. Immers, een return type van een methode kan een zelfgedefinieerde klasse zijn. Er moet wel bekend zijn op dat moment of die klasse ook echt bestaat.
+
+Er traden ook problemen op bij het maken van compatibiliteit van .NET Framework klassen. Ons eerste idee was om de symbol table uit te breiden met functionaliteit voor named scopes, om zo de mogelijkheid te hebben om klassen en methoden hierin op te slaan. Later is van dit idee afgeweken, omdat zo bestaande .NET klassen en zelfgedefinieerde klassen op verschillende manieren werden aangesproken.
+
+Er is toen naar een oplossing gezocht waarbij er geen verschil zou zijn tussen het zoeken naar bestaande .NET klassen en zelfgedefinieerde klassen. Deze oplossing is gevonden door de bestaande .NET Reflection klassen te extenden. In onze oplossing wordt bijvoorbeeld een klasse of interface gerepresenteerd door de abstracte klasse Type, waarbij een standaard .NET klasse een RuntimeType is en een zelfgedefinieerde klasse een UserType. Iets soortgelijks geldt voor methoden, velden en dergelijke, waardoor alles volgens dezelfde interface aangesproken kan worden.
+
+\subsection{Code generator}
+Wanneer een checker goed is ontworpen levert het maken van de generator vaak nauwelijks problemen op. De code templates van de specificatie van een taal kunnen bijna letterlijk worden overgenomen bij het maken van de generator.
+
+Een aantal punten leverden echter nog problemen op, mede doordat er toch een aantal punten in de checker waren die beter ontworpen hadden kunnen worden. Het belangrijkste punt hiervan is dat de checker trees niet meer herschrijft. Op bepaalde punten, met name bij methode/veld aanroepen, maar zeker ook bij bepaalde expressies en constanten was het handiger geweest om in de checker tree rewrite toe te passen. Er was echter in een vroeg stadium voor gekozen om dit niet te doen en dit was niet meer makkelijk te veranderen.
+
+Ook het implementeren van meerdere assignments leverde problemen op. Neem bijvoorbeeld de assignment \emph{this::a = this::b = 5 * c}. Zowel this::b en this::a krijgen hier de waarde toegekend van \emph{5 * c}. Nu zijn er twee mogelijkheden om dit te realiseren:
+\begin{itemize}
+	\item door de expressie \emph{5 * c} tweemaal uit te voeren, \'e\'en per assignment, of,
+	\item door de expressie \emph{5 * c} eenmaal uit te voeren, deze in een tijdelijke variabele op te slaan en vervolgens dit gebruiken om de assignment uit te voeren.
+\end{itemize}
+Het is niet mogelijk om de expressie uit te voeren gevolgd door de duplicate opcode, omdat de linkerkant van een assignment in onze taal ook kan bestaan uit een instantievariabele, waarbij een referentie naar de this pointer dus al op de stack staat. Een assignment na een duplicate uitvoeren zou dan niet werken, vanwege verkeerde waardes op de stack.
+
+Wij hebben gekozen voor de tweede oplossing waarbij een tijdelijke variabele gebruikt wordt. Hiervoor hebben wij gekozen, omdat het nutteloos is dezelfde expressie tweemaal uit te voeren. Dit is alleen maar ineffici\'ent.

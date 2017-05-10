@@ -1,0 +1,35 @@
+import System;
+import System.Collections;
+import System.Drawing;
+import System.Timers;
+import System.Windows.Forms;
+import System.ComponentModel;
+
+namespace BoterKaasEieren
+{
+	class public DommeStrategie implements IStrategie
+	{
+	   private Random random;
+	   
+	   public DommeStrategie()
+	   {
+	      this::random = new Random();
+	   }
+	   
+	   public Int32 BerekenZet(Bord bord, Mark mark)
+	   {
+	      ArrayList zetten = new ArrayList();
+	      Int32 i = 0;
+	      while (i < Bord::DIM * Bord::DIM;)
+	      {
+	         if (bord::IsLeegVakje(i);) then
+	         {
+	            zetten::Add((Object)i);
+	         } ;
+	         i = i + 1;
+	      };
+	      (Int32)zetten::get_Item(this::random::Next(0, zetten::get_Count()));
+	   }
+	}
+
+}

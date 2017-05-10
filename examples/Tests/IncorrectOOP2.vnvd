@@ -1,0 +1,37 @@
+import System;
+
+namespace Tests
+{
+	class public A
+	{
+	   
+      public virtual void Test()
+      {
+      
+      }
+      
+      public virtual String Test2()
+      {
+         "";
+      }
+      
+      // abstract method in non abstract class
+      public abstract void AbstractMethod();
+	}
+	
+	class public B extends A
+	{
+	   //wrong parameter override
+	   public override void Test2(String t)
+	   {
+	   
+	   }
+	   
+	   //wrong return type override
+	   public override void Test2()
+	   {
+	   
+	   }
+	}
+	
+}

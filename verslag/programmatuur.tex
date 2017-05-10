@@ -1,0 +1,110 @@
+\section{Beschrijving van de programmatuur}
+Naast de door ANTLR gecre\"eerde klassen bevat de code van de VNVD compiler nog enkele andere stukken code. Deze klassen staan hier per bestand en per klasse beschreven om zo een goed beeld te geven van de programmatuur.
+
+Op de meegeleverde cd-rom is ook een volledige documentatie gegenereerd uit de XML code documentation comments te vinden. In deze documentatie wordt ook uitgebreid ingegaan op de functionaliteit van de diverse members van de klassen.
+
+\subsection{AbstractHelper.cs}
+Hierin staat de klasse \textit{Vnvd.AbstractHelper} gedefinieerd. Deze klasse vormt de basis voor de zogenaamde TreeWalker Helpers die de VNVD compiler gebruikt. In deze klasse worden alle functies gedefinieerd die vanuit de TreeWalker kunnen worden aangeroepen, daarnaast bevat zij een aantal algemene constructies voor de TreeWalkers.
+
+\subsection{CheckerHelper.cs}
+Dit bestand bevat de definities van twee klassen, namelijk \textit{Vnvd.CheckerHelper} en \textit{Vnvd.CheckerException}. De eerst genoemde is de exceptie die de checker gebruikt als zij inconsistenties of andere problemen aantreft. De tweede klasse is de uitbreiding van de \textit{Vnvd.AbstractHelper} klasse voor de checker. Deze klasse voert het eigenlijke werk van de checker uit.
+
+\subsection{CheckerManual.cs}
+De definitie van de klasse \textit{Vnvd.CheckerManual} geschiedt in dit bestand. Deze klasse wordt voor de TreeWalker van de checker gedraaid. In deze eerste pass van de checker component worden namespaces, klassen en hun members gedefini\"eerd, zodat zij probleemloos gebruikt kunnen worden.
+
+\subsection{EntryType.cs}
+In het bestand \textit{EntryType.cs} wordt de enumeratie \textit{Vnvd.EntryType} gedeclareerd. Deze enumeratie bevat de typen die een \textit{Vnvd.TreeNode} kan hebben.
+
+\subsection{GeneratorHelper.cs}
+Dit bestand bevat de klasse \textit{Vnvd.CheckerHelper}. Deze klasse is de uitbreiding van de \textit{Vnvd.AbstractHelper} klasse voor de code generator. Hierin wordt het eigenlijke werk van de code generator uitgevoerd.
+
+\subsection{GeneratorManual.cs}
+Hierin staat de definitie van de klasse \textit{Vnvd.GeneratorManual}. Deze klasse wordt voor de TreeWalker van de code generator gedraaid. In deze eerste pass van de code generator component wordt de code voor namespaces, klassen en hun members gegenereerd, zodat zij probleemloos gebruikt kunnen worden.
+
+\subsection{IdEntry.cs}
+De definitie van de klasse \textit{Vnvd.IdEntry} bevindt zich in dit bestand. Deze klasse is een representatie voor een item in een \textit{Vnvd.ISymTab}. Deze klasse bevat onder andere een link naar de node in de \textit{abstract syntax tree} waarin dit item gedeclareerd wordt.
+
+\subsection{ISymTab.cs}
+Dit bestand bevat de definitie van de klasse \textit{Vnvd.ISymTab}. Dit is de interface gebruikt voor een symbol table. De basis functionaliteiten voor een symbol table staan hierin gedefinieerd.
+
+\subsection{LibraryChecker.cs}
+De hierin gedefinieerde klasse \textit{Vnvd.LibraryChecker} is bedoeld om te controleren of externe objecten bestaan. Met behulp van deze klasse kunnen aanroepen naar objecten, methoden en dergelijken die elders in het .NET framework staan gecontroleerd worden. De checker gebruikt deze klasse om ervoor te zorgen dat alle definities bestaan. De code generator gebruikt vervolgens de resultaten om in de assembly de juiste links te plaatsen.
+
+\subsection{Pair.cs}
+De klasse \textit{Vnvd.Pair} is een representatie voor een tuple van twee variabelen. Deze klasse wordt vooral gebruikt om interne presentatie te vergemakkelijken.
+
+\subsection{Parameter.cs}
+De klasse \textit{Vnvd.Paramter} is een representatie voor een tuple van een volledige qualifier, ge\"implementeerd als een \textit{Vnvd.Qualifier}, en een identifier. De eerste is in dit geval een type en de tweede de naam van de parameter. Deze klasse wordt vooral gebruikt om interne presentatie te vergemakkelijken.
+
+\subsection{Qualifier.cs}
+De klasse \textit{Vnvd.Qualifier} is een representatie voor een volledige qualifier. Dat is een referentie naar een namespace, klasse of methode. Deze klasse wordt vooral gebruikt om interne presentatie te vergemakkelijken.
+
+\subsection{StringHelper.cs}
+Dit bestand bevat de statische klasse \textit{Vnvd.StringHelper}. In deze klasse staan enkele methoden voor het gebruik van string literals in de te compileren code. Zo staan de methoden die escape sequences kunnen omzetten naar een echte string in deze klasse.
+
+\subsection{SymbolTable.cs}
+In dit bestand staat de klasse \textit{Vnvd.SymbolTable} en de bijbehorende klasse \textit{Vnvd.SymbolTableException}. Deze klasse bevat de in VNVD gebruikte implementatie van een symbol table en is dan ook een uitbreiding van \textit{Vnvd.ISymTab}.
+
+In VNVD kent elke methode zijn eigen symbol table, waarin de variabelen die in de scope van die methode gedeclareerd worden zijn opgenomen. Naar members van de klasse zelf of een van zijn superklassen wordt gerefereerd via de \textit{this} of de \textit{base} variabele. Deze hoeven dus niet in de symbol table meegenomen te worden.
+
+\subsection{TreeNode.cs}
+De klasse \textit{Vnvd.TreeNode} staat in dit bestand. Dit is de in de TreeWalkers gebruikte versie van de \textit{abstract syntax tree} node. Naast de standaard functionaliteit bevat deze ook properties voor de entry in de symbol table, het type van de entry, het (return) type van de node en de waarde van de node.
+
+Aan een TreeNode van, bijvoorbeeld, een literal hangt dus het type van de literal en zijn waarde. Bij de TreeNode van een variabele zal, naast zijn type, de entry in de symbol table van deze variabele te vinden zijn.
+
+\subsection{TreeNodeAdapter.cs}
+Dit bestand bevat de klasse \textit{Vnvd.TreeNodeAdaptor}. Naast dat deze klasse om historische redenen een spelfout in de naam heeft is dit ook de klasse die ANTLR gebruikt om \textit{Vnvd.TreeNode} objecten aan te kunnen maken.
+
+\subsection{Vnvd.cs}
+De zogenaamde \textit{main()} functie van VNVD is in dit bestand gedefinieerd. Deze maakt deel uit van de klasse \textit{Vnvd.Vnvd}. Dit is de klasse die de compiler start en aanstuurt.
+
+\subsection{Antlr/VnvdChecker.cs}
+Dit bestand bevat de door ANTLR gegenereerde TreeWalker voor de checker. De ANTLR bron hiervan is te vinden in de apendices.
+
+\subsection{Antlr/VnvdGenerator.cs}
+Dit bestand bevat de door ANTLR gegenereerde TreeWalker voor de code generator. De ANTLR bron hiervan is te vinden in de apendices.
+
+\subsection{Antlr/VnvdLexer.cs}
+Dit bestand bevat de door ANTLR gegenereerde lexer. De ANTLR bron hiervan is te vinden in de apendices.
+
+\subsection{Antlr/VnvdParser.cs}
+Dit bestand bevat de door ANTLR gegenereerde parser. De ANTLR bron hiervan is te vinden in de apendices.
+
+\subsection{Properties/AssemblyInfo.cs}
+In dit bestand staan algemene definities die nodig zijn voor een C\# applicatie. Deze specificaties zijn niet VNVD specifiek.
+
+\subsection{UserDefined/CustomBinder.cs}
+De in dit bestand gedefinieerde klasse \textit{Vnvd.UserDefined.CustomBinder} zorgt voor de zogenaamde binding van typen. Deze klasse is een uitbreiding op de standaard functionaliteit van C\# waarin niet alleen de functionaliteiten uit externe assemblies worden gevonden, maar ook die in de bestanden die nu gecompileerd worden.
+
+\subsection{UserDefined/ErrorType.cs}
+De klasse in dit bestand, \textit{Vnvd.UserDefined.ErrorType}, is het type dat wordt gegeven aan nodes in de \textit{abstract syntax tree} waarbij een fout is ontstaan. De checker gebruikt dit type om de rest van de code wel door de checker te kunnen halen, ondanks een gedetecteerde fout. Zo kunnen er in een keer meer en betere foutmeldingen worden gegeven, voordat de checker moet onderbreken. Deze klasse breid \textit{Vnvd.UserDefined.UserType} uit.
+
+\subsection{UserDefined/IMethodOrConstructor.cs}
+De interface die gebruikt wordt voor de klassen \textit{Vnvd.UserDefined.UserMethod} en \textit{Vnvd.UserDefined.UserConstructor} wordt in dit bestand gedefinieerd. Zo kunnen generieke methoden, die voor zowel methoden als constructoren gelden, op een wijze worden afgehandeld.
+
+\subsection{UserDefined/MethodType.cs}
+In dit bestand wordt de klasse \textit{Vnvd.UserDefined.MethodType} gedefinieerd. Deze klasse representeert een delegate naar een methode. Dat wil zeggen, een pointer naar een methode. In de \textit{abstract syntax tree} kan deze klasse gebruikt worden om het type van een node een methode invocatie te maken.
+
+\subsection{UserDefined/NullType.cs}
+Dit bestand bevat de klasse \textit{Vnvd.UserDefined.NullType} die het een object met waarde null representeert. Deze klasse maakt een uitbreiding van de klasse \textit{Vnvd.UserDefined.UserType}.
+
+\subsection{UserDefined/UserConstructor.cs}
+De hierin gedefinieerde klasse \textit{Vnvd.UserDefined.UserConstructor} representeert een constructor type van een klasse in de te compileren code. Deze klasse maakt gebruik van de interface \textit{Vnvd.UserDefined.IMethodOrConstructor}.
+
+\subsection{UserDefined/UserEnum.cs}
+Dit bestand bevat de definitie van de klasse \textit{Vnvd.UserDefined.UserEnum}. Deze klasse is een representatie van een enumeratie type in de te compileren code. De klasse \textit{Vnvd.UserDefined.UserType} wordt door deze klasse uitgebreid.
+
+\subsection{UserDefined/UserField.cs}
+De in dit bestand gedefinieerde klasse \textit{Vnvd.UserDefined.UserField} wordt gebruikt om een in de te compileren code gedefinieerd veld te representeren.
+
+\subsection{UserDefined/UserLocal.cs}
+De in dit bestand gedefinieerde klasse \textit{Vnvd.UserDefined.UserLocal} wordt gebruikt om een in de te compileren code gedefinieerde lokale variabele te representeren.
+
+\subsection{UserDefined/UserMethod.cs}
+De in dit bestand gedefinieerde klasse \textit{Vnvd.UserDefined.UserMethod} wordt gebruikt om een in de te compileren code gedefinieerde methode te representeren.
+
+\subsection{UserDefined/UserParameter.cs}
+De in dit bestand gedefinieerde klasse \textit{Vnvd.UserDefined.UserParameter} wordt gebruikt om een in de te compileren code gedefinieerde parameter te representeren.
+
+\subsection{UserDefined/UserType.cs}
+De klasse \textit{Vnvd.UserDefined.UserType}, die gedefinieerd is in dit bestand, is een representatie van een in de te compileren code gedefinieerd type. Deze user-defined typen zijn (abstracte) klassen en interfaces. Daarnaast gebruiken de typen \textit{Vnvd.UserDefined.UserEnum}, \textit{Vnvd.UserDefined.ErrorType} en \textit{Vnvd.UserDefined.NullType} deze klasse als superklasse.

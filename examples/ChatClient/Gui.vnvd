@@ -1,0 +1,74 @@
+import System;
+import System.Collections;
+import System.Drawing;
+import System.Timers;
+import System.Windows.Forms;
+import System.Drawing;
+import System.Threading;
+
+namespace ChatClient
+{
+	class public Gui extends Form implements IMessageListener
+	{
+	   private TextBox textArea;
+	   private TextBox textInput;
+	   private Button button;
+	   
+	   private Client client;
+	   
+	   public static void Main()
+	   {
+	      Application::Run(new Gui());
+	   }
+	   
+	   public Gui()
+	   {
+	      this::set_Text("Chat Client");
+
+	      this::textArea = new TextBox();
+	      this::textArea::set_Multiline(true);
+	      this::textArea::set_Dock(DockStyle::Top);
+	      this::textArea::set_Size(new Size(100, 200));
+	      this::get_Controls()::Add(this::textArea);
+	     
+	     	this::textInput = new TextBox();
+	     	this::textInput::set_Dock(DockStyle::Top);
+	     	this::textInput::set_Location(new Point(0, 200));
+	     	this::textInput::KeyDown += new KeyEventHandler(this::textInput_KeyDown);
+	      this::get_Controls()::Add(this::textInput);
+	      
+	      this::button = new Button();
+	      this::button::set_Location(new Point(20, 240));
+	      this::button::set_Text("Connect!");
+	      this::button::set_Anchor(AnchorStyles::Bottom);
+	      this::button::Click += new EventHandler(this::button_Clicked);
+	      this::get_Controls()::Add(this::button);
+	   }
+	   
+	   public void MessageReceived(Object message)
+	   {
+	      this::textArea::AppendText(message::ToString() + Environment::get_NewLine());
+	   }
+	   
+	   private void button_Clicked(Object sender, EventArgs e)
+	   {
+	      this::client = new Client(this, "localhost", 3443);
+	      Thread t;
+	      t = new Thread(new ThreadStart(this::client::Start));
+	      t::set_IsBackground(true);
+	      t::Start();
+	      this::button::set_Enabled(false);
+	      this::textArea::AppendText("Connecting..." + Environment::get_NewLine());
+	   }
+	   
+	   private void textInput_KeyDown(Object sender, KeyEventArgs e)
+	   {
+	      if (e::get_KeyCode() == Keys::Return;) then
+	      {
+	         //this::textArea::AppendText(this::textInput::get_Text() + Environment::get_NewLine());
+	         this::client::WriteLine(this::textInput::get_Text());
+	         this::textInput::Clear();
+	      } ;
+	   }
+	}
+}

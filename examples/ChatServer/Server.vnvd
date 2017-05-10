@@ -1,0 +1,76 @@
+import System;
+import System.Collections;
+import System.Net;
+import System.Net.Sockets;
+import System.Threading;
+
+namespace ChatServer
+{
+	class public Server
+	{
+	   public static void Main()
+	   {
+	      Server s;
+	      s = new Server(3443);
+	      s::Start();
+	   }
+	   
+	   private TcpListener listener;
+	   private Int32 port;
+	   private Boolean listening;
+	   private ArrayList clients;
+	   
+	   public Server(Int32 port)
+	   {
+	      this::clients = new ArrayList();
+	      this::port = port;
+	   }
+	   
+	   public void Start()
+	   {
+	      ClientHandler handler;
+	      TcpClient cl;
+	      
+	      this::listener = new TcpListener(IPAddress::Any, this::port);
+	      this::listener::Start();
+	      this::listening = true;
+	      Console::WriteLine("Listening...");
+	      while (this::listening;)
+	      {
+	         try
+	         {
+	            cl = this::listener::AcceptTcpClient();
+	            handler = new ClientHandler(this, cl);
+	            Console::WriteLine("Accepted client");
+	            Thread t;
+	            t = new Thread(new ThreadStart(handler::Run));
+	            t::set_IsBackground(true);
+	            t::Start();
+	         }
+	         catch (SocketException ex)
+	         {
+	            Console::WriteLine("Some SocketException occurred");
+	         };
+	      };
+	   }
+	   
+	   public void RemoveClient(ClientHandler handler)
+	   {
+	      this::clients::Remove(handler);
+	      Console::WriteLine("Removed client: " + handler::get_Name());
+	   }
+	   
+	   public void AddClient(ClientHandler handler)
+	   {
+	      this::clients::Add(handler);
+	   }
+	   
+	   public void Broadcast(String message)
+	   {
+	      for (ClientHandler handler in this::clients)
+	      {
+	         handler::WriteLine(message);
+	      };
+	   }
+	}
+}

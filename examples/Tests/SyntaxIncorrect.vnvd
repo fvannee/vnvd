@@ -1,0 +1,24 @@
+import System;
+
+namespace Tests
+{
+   class public SyntaxIncorrect
+   {
+      public static void Main(String[] argv)
+      {
+         Int32 a, b;
+         
+         // error in expression
+         a + * b;
+         
+         // error in assigment
+         a :-b;
+         
+         // random gibberish
+         for gebin ned repeat;
+         
+         // good expression
+         a + b;
+      }
+   }
+}
